@@ -327,7 +327,7 @@ const Battle = ({ playerDeck, onGoHome }) => {
                     disabled={
                         (Object.values(grid)
                             .slice(0, 3)
-                            .some((slot) => slot === null) ||
+                            .some((slot) => slot === null) &&
                             hand.length > 0) ||
                         gameOver
                     }
