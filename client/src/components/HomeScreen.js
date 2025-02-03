@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Card from "./Card";
 import cardsData from "../data/cards.json"; // Import the card data
 import "./HomeScreen.css";
@@ -10,16 +10,23 @@ function HomeScreen({ onSelectionComplete }) {
     level3: [],
   });
 
+  // Deep copy of the original card data to avoid mutations
+  const getInitialCards = () => JSON.parse(JSON.stringify(cardsData));
+
+  const [cards, setCards] = useState(getInitialCards());
+
+  useEffect(() => {
+    // Reset cards to their original values when HomeScreen mounts
+    setCards(getInitialCards());
+  }, []);
+
   const handleCardClick = (card, level) => {
-    // Allow selecting up to 3 cards per level
     if (selectedCards[level].includes(card)) {
-      // If card is already selected, remove it
       setSelectedCards((prev) => ({
         ...prev,
         [level]: prev[level].filter((c) => c.id !== card.id),
       }));
     } else if (selectedCards[level].length < 3) {
-      // If less than 3 selected, add the card
       setSelectedCards((prev) => ({
         ...prev,
         [level]: [...prev[level], card],
@@ -33,7 +40,7 @@ function HomeScreen({ onSelectionComplete }) {
       selectedCards.level2.length === 3 &&
       selectedCards.level3.length === 3
     ) {
-      onSelectionComplete(selectedCards); // Pass selected cards to the next screen
+      onSelectionComplete(selectedCards);
     } else {
       alert("Please select 3 cards from each level!");
     }
@@ -45,7 +52,7 @@ function HomeScreen({ onSelectionComplete }) {
         <div key={level}>
           <h2>Select 3 Cards from {level.toUpperCase()}</h2>
           <div className="card-grid">
-            {cardsData[level].map((card) => (
+            {cards[level].map((card) => (
               <div
                 key={card.id}
                 className={`card-wrapper ${
