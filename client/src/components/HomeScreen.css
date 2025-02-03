@@ -1,0 +1,21 @@
+.card-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.card-wrapper {
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.card-wrapper:hover {
+    transform: scale(1.05);
+}
+
+.card-wrapper.selected {
+    border: 3px solid gold;
+    transform: scale(1.1);
+}

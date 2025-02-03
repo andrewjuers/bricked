@@ -1,0 +1,57 @@
+.player-row {
+    display: flex;
+    flex-direction: row; /* Default: horizontal */
+    justify-content: center; /* Centers items horizontally within the row */
+    gap: 10px; /* Adds space between the cards */
+    padding-bottom: 1em;
+}
+
+.card-slot {
+    border: 1px solid black;
+    width: 150px;
+    height: 225px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f9f9f9; /* Slight background color for slots */
+    transition: background-color 0.2s ease; /* Smooth transition for background color */
+}
+
+.card-slot:hover {
+    background-color: #f0f0f0; /* Highlight the slot when hovered */
+    border-color: #000; /* Darker border when hovered */
+}
+
+.card-slot:active {
+    background-color: #e0e0e0; /* Darker background when the slot is clicked */
+}
+
+.card-slot div {
+    font-size: 14px;
+    color: #333;
+    font-weight: bold;
+}
+
+.player-cards {
+    display: flex;
+    gap: 10px;
+    justify-content: center; /* Centers the player cards horizontally */
+    margin-top: 2em;
+}
+
+.card-slot {
+    cursor: pointer; /* Indicates that the slot is interactive */
+}
+
+.card-slot[draggable="true"] {
+    background-color: #e9f7fb; /* Light blue for draggable cards */
+}
+
+.card-slot[draggable="true"]:hover {
+    background-color: #d5eff7; /* Lighter blue when hovering */
+}
+
+.card-slot.occupied {
+    background-color: #ddd; /* Change to any color to indicate slot is occupied */
+    /* pointer-events: none; /* Disable interaction SCREW THIS LINE TOOK ME AN HOUR TO FIX THIS */
+}
