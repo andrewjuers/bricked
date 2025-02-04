@@ -1,20 +1,21 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import "./App.css";
 import io from "socket.io-client";
 import HomeScreen from "./components/HomeScreen";
 import Battle from "./components/Battle";
+import { generateOpponentDeck } from "./logic/computerOpponentLogic";
 
 const socket = io.connect("http://localhost:3001");
 
 function App() {
     const [currentScreen, setCurrentScreen] = useState("home");
     const [playerDeck, setPlayerDeck] = useState([]);
+    const [opponentDeck, setOpponentDeck] = useState(null);
 
-    // This is the function that HomeScreen expects for the "onSelectionComplete" prop
     const handleSelectionComplete = (selectedCards) => {
-        // Handle the selected cards and transition to battle or another action
-        setPlayerDeck(selectedCards);  // Example: Set player deck with selected cards
-        setCurrentScreen("battle");    // Transition to battle screen
+        setPlayerDeck(JSON.parse(JSON.stringify(selectedCards)));  
+        setOpponentDeck(generateOpponentDeck());
+        setCurrentScreen("battle");
     };
 
     const goHome = () => {
@@ -25,7 +26,7 @@ function App() {
         <div className="App">
             {currentScreen === "home" && <HomeScreen onSelectionComplete={handleSelectionComplete} />}
             {currentScreen === "battle" && (
-                <Battle playerDeck={playerDeck} onGoHome={goHome} />
+                <Battle playerDeck={playerDeck} opponentDeck={opponentDeck} onGoHome={goHome} />
             )}
         </div>
     );

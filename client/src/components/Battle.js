@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
 import BattleGrid from "./BattleGrid";
 import Card from "./Card";
-import cardsData from "../data/cards.json"; // Import card data for random opponent cards
 import "./Battle.css";
 import { handleBattleTurn } from "../logic/battleLogic";
 
-const Battle = ({ playerDeck, onGoHome }) => {
+const Battle = ({ playerDeck, opponentDeck, onGoHome }) => {
     const [hand, setHand] = useState([...playerDeck.level1]); // Player's current hand
     const [grid, setGrid] = useState({
         slot1: null,
@@ -15,7 +14,7 @@ const Battle = ({ playerDeck, onGoHome }) => {
         slot5: null,
         slot6: null,
     });
-    const [opponentCards, setOpponentCards] = useState([]); // Opponent's cards
+    const [opponentCards, setOpponentCards] = useState([...opponentDeck.level1]);
     const [turn, setTurn] = useState(1);
     const [currentLevel, setCurrentLevel] = useState(1); // Track player's deck level
     const [gameOver, setGameOver] = useState(false);
@@ -24,36 +23,6 @@ const Battle = ({ playerDeck, onGoHome }) => {
     // To store the initial state of grid and hand
     const [initialGrid, setInitialGrid] = useState({});
     const [initialHand, setInitialHand] = useState([]);
-
-    useEffect(() => {
-        // Function to shuffle an array (Fisher-Yates algorithm)
-        const shuffleArray = (array) => {
-            let shuffled = [...array]; // Copy array to avoid mutation
-            for (let i = shuffled.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]; // Swap elements
-            }
-            return shuffled;
-        };
-
-        const getRandomUniqueCards = (level, count) => {
-            const levelCards = cardsData[level];
-            if (levelCards.length < count) {
-                console.warn(`Not enough cards available for level: ${level}`);
-                return levelCards; // Return all available if not enough
-            }
-            return shuffleArray(levelCards).slice(0, count); // Take the first 'count' shuffled cards
-        };
-
-        // Generate unique opponent cards
-        const generatedOpponentCards = [
-            ...getRandomUniqueCards("level1", 3),
-            ...getRandomUniqueCards("level2", 3),
-            ...getRandomUniqueCards("level3", 3),
-        ];
-
-        setOpponentCards(generatedOpponentCards);
-    }, []);
 
     const normalizeAbilities = (abilities) => {
         if (!abilities || typeof abilities !== "object") {
@@ -161,7 +130,13 @@ const Battle = ({ playerDeck, onGoHome }) => {
         });
 
         // Update for the next turn
-        setOpponentCards((prev) => prev.slice(3)); // Remove used opponent cards
+        if (opponentCards.length === 0) {
+            if (currentLevel === 1 && opponentDeck.level2) {
+                setOpponentCards([...opponentDeck.level2]);
+            } else if (currentLevel === 2 && opponentDeck.level3) {
+                setOpponentCards([...opponentDeck.level3]);
+            }
+        }        
         setTurn(turn + 1);
 
         // Load the next level of cards if the hand is empty

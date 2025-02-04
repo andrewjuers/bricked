@@ -1,9 +1,9 @@
-import React, { useMemo } from "react";
+import React from "react";
 import "./Card.css";
-import cards from "../data/cards.json"; // Adjust the path as needed
+import cards from "../data/cards.json";
 
 // Utility function to calculate max health
-const calculateMaxHealth = (idOrIds, cards) => {
+const calculateMaxHealth = (idOrIds) => {
     let totalMaxHealth = 0;
     const ids = Array.isArray(idOrIds) ? idOrIds : [idOrIds];
 
@@ -27,10 +27,6 @@ const calculateMaxHealth = (idOrIds, cards) => {
 const Card = ({ card }) => {
     const { name, health, attack, ability, id } = card;
 
-    // Memoize maxHealth calculation for performance
-    const maxHealth = useMemo(() => calculateMaxHealth(id, cards), [id]);
-
-    // Memoize dragStart handler to avoid inline function creation
     const handleDragStart = (event) => {
         event.dataTransfer.setData("card", JSON.stringify(card));
     };
@@ -45,7 +41,7 @@ const Card = ({ card }) => {
             {/* Top section with health and attack */}
             <div className="card-top">
                 <div className="card-health">
-                    {health}/{maxHealth}
+                    {health}/{calculateMaxHealth(id)}
                 </div>
                 <div className="card-attack">{attack}</div>
             </div>
