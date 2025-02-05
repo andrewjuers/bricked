@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Card from "./Card";
 import cardsData from "../data/cards.json"; // Import JSON data
 import "./HomeScreen.css";
+import Chatbox from "./ChatBox";
 
 function HomeScreen({ onSelectionComplete }) {
     const [selectedCards, setSelectedCards] = useState({
@@ -42,6 +43,7 @@ function HomeScreen({ onSelectionComplete }) {
 
     return (
         <div className="HomeScreen">
+            <Chatbox />
             {["level1", "level2", "level3"].map((level) => (
                 <div key={level}>
                     <h2>Select 3 Cards from {level.toUpperCase()}</h2>
