@@ -101,7 +101,7 @@ const applyArmor = (card, incomingDamage) => {
 };
 
 // Apply Thorns damage back to attacker
-const applyThorns = (card, damageTaken) => {
+const applyThorns = (card) => {
     if (card.ability?.["Thorns"]) {
         const thornsDamage = card.ability["Thorns"];
         return thornsDamage; // Return thorns damage
@@ -149,15 +149,15 @@ export const handleBattleTurn = (playerCards, enemyCards) => {
             }
 
             // Apply Thorns damage to the attacker after damage is dealt
-            if (enemyCard.health < playerCard.health) {
-                const thornsDamage = applyThorns(enemyCard, incomingDamage);
+            if (enemyDamage > 0) {
+                const thornsDamage = applyThorns(enemyCard);
                 if (thornsDamage > 0) {
                     playerCard.health -= thornsDamage; // Thorns damage to player card
                 }
             }
 
-            if (playerCard.health < enemyCard.health) {
-                const thornsDamage = applyThorns(playerCard, enemyDamage);
+            if (incomingDamage > 0) {
+                const thornsDamage = applyThorns(playerCard);
                 if (thornsDamage > 0) {
                     enemyCard.health -= thornsDamage; // Thorns damage to enemy card
                 }
