@@ -5,7 +5,9 @@ import HomeScreen from "./components/HomeScreen";
 import Battle from "./components/Battle";
 import { generateOpponentDeck } from "./logic/computerOpponentLogic";
 
-const socket = io.connect("http://localhost:3001");
+const socket = io.connect("https://bricked.onrender.com", {
+    transports: ["websocket"],
+});
 
 function App() {
     const [currentScreen, setCurrentScreen] = useState("home");
