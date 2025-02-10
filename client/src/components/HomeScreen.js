@@ -25,14 +25,23 @@ function HomeScreen({ onSelectionComplete, startBattle, room, setRoom }) {
 
     const handleCardClick = (card, level) => {
         setSelectedCards((prev) => {
-            const updatedLevel = prev[level].some((c) => c.id === card.id)
-                ? prev[level].filter((c) => c.id !== card.id) // Remove card
-                : [...prev[level], { ...card }]; // Clone card before adding
+            const isAlreadySelected = prev[level].some((c) => c.id === card.id);
 
-            return {
-                ...prev,
-                [level]: updatedLevel,
-            };
+            if (isAlreadySelected) {
+                // If the card is already selected, remove it
+                return {
+                    ...prev,
+                    [level]: prev[level].filter((c) => c.id !== card.id),
+                };
+            } else if (prev[level].length < 3) {
+                // Only add the card if there are fewer than 3 selected
+                return {
+                    ...prev,
+                    [level]: [...prev[level], { ...card }],
+                };
+            }
+
+            return prev; // Do nothing if already at max selection
         });
     };
 
@@ -95,9 +104,11 @@ function HomeScreen({ onSelectionComplete, startBattle, room, setRoom }) {
             <button
                 onClick={() => startBattle(selectedCards)}
                 disabled={
-                    !(selectedCards.level1.length === 3 &&
-                    selectedCards.level2.length === 3 &&
-                    selectedCards.level3.length === 3)
+                    !(
+                        selectedCards.level1.length === 3 &&
+                        selectedCards.level2.length === 3 &&
+                        selectedCards.level3.length === 3
+                    )
                 }
             >
                 Multi-Player
