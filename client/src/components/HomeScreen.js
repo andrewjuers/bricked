@@ -1,15 +1,27 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Card from "./Card";
 import cardsData from "../data/cards.json"; // Import JSON data
 import "./HomeScreen.css";
 import Chatbox from "./ChatBox";
+import { io } from "socket.io-client";
 
-function HomeScreen({ onSelectionComplete }) {
+const socket = io.connect("https://bricked.onrender.com", {
+    transports: ["websocket"],
+});
+
+function HomeScreen({ onSelectionComplete, startBattle, room, setRoom }) {
     const [selectedCards, setSelectedCards] = useState({
         level1: [],
         level2: [],
         level3: [],
     });
+    const [isRoomReady, setIsRoomReady] = useState(false);
+
+    useEffect(() => {
+        socket.on("room_ready", () => {
+            setIsRoomReady(true);
+        });
+    }, []);
 
     const handleCardClick = (card, level) => {
         setSelectedCards((prev) => {
@@ -30,14 +42,18 @@ function HomeScreen({ onSelectionComplete }) {
             selectedCards.level2.length === 3 &&
             selectedCards.level3.length === 3
         ) {
-            // Deep copy selected cards to prevent external modifications
             const freshSelectedCards = JSON.parse(
                 JSON.stringify(selectedCards)
             );
-
             onSelectionComplete(freshSelectedCards);
         } else {
             alert("Please select 3 cards from each level!");
+        }
+    };
+
+    const joinRoom = () => {
+        if (room !== "") {
+            socket.emit("join_room", room);
         }
     };
 
@@ -75,7 +91,17 @@ function HomeScreen({ onSelectionComplete }) {
                     </div>
                 </div>
             ))}
-            <button onClick={handleNext}>Next</button>
+            <button onClick={handleNext}>CPU Battle</button>
+            <button
+                onClick={() => startBattle(selectedCards)}
+                disabled={
+                    !(selectedCards.level1.length === 3 &&
+                    selectedCards.level2.length === 3 &&
+                    selectedCards.level3.length === 3)
+                }
+            >
+                Multi-Player
+            </button>
         </div>
     );
 }

@@ -3,6 +3,7 @@ const app = express();
 const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
+const { makeid } = require('./utils');
 
 app.use(cors());
 
@@ -15,7 +16,8 @@ const io = new Server(server, {
     },
 });
 
-const players = {}; // Fix: Added players object
+const state = {};
+const severRooms = {};
 
 io.on("connection", (socket) => {
     console.log(`User Connected: ${socket.id}`);
@@ -25,28 +27,48 @@ io.on("connection", (socket) => {
         console.log(data);
     });
 
-    // Handle new player joining
-    socket.on("joinGame", (playerData) => {
-        players[socket.id] = playerData;
-        io.emit("updatePlayers", players);
-    });
+    socket.on("newGame", handleNewGame);
+    socket.on("joinGame", handleJoinGame);
 
-    // Handle card selection updates
-    socket.on("updateSelection", (selection) => {
-        if (players[socket.id]) {
-            players[socket.id].selectedCards = selection;
-            io.emit("updatePlayers", players);
+    function handleJoinGame(roomName) {
+        const room = io.sockets.adapter.rooms[roomName];
+    
+        let allUsers;
+        if (room) {
+          allUsers = room.sockets;
         }
-    });
-
-    // Handle player disconnection
-    socket.on("disconnect", () => {
-        console.log(`User disconnected: ${socket.id}`);
-        delete players[socket.id];
-        io.emit("updatePlayers", players);
-    });
-});
-
-server.listen(3001, () => {
-    console.log("SERVER IS RUNNING");
+    
+        let numsevers = 0;
+        if (allUsers) {
+          numsevers = Object.keys(allUsers).length;
+        }
+    
+        if (numsevers === 0) {
+          sever.emit('unknownCode');
+          return;
+        } else if (numsevers > 1) {
+          sever.emit('tooManyPlayers');
+          return;
+        }
+    
+        severRooms[sever.id] = roomName;
+    
+        sever.join(roomName);
+        sever.number = 2;
+        sever.emit('init', 2);
+        
+        startGameInterval(roomName);
+      }
+    
+      function handleNewGame() {
+        let roomName = makeid(5);
+        severRooms[sever.id] = roomName;
+        sever.emit('gameCode', roomName);
+    
+        state[roomName] = initGame();
+    
+        sever.join(roomName);
+        sever.number = 1;
+        sever.emit('init', 1);
+      }
 });
