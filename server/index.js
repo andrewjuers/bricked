@@ -29,7 +29,7 @@ io.on("connection", (socket) => {
     socket.on("newGame", handleNewGame);
     socket.on("joinGame", handleJoinGame);
 
-    function handleJoinGame(roomName) {
+    function handleJoinGame(roomName, playerDeck) {
         const room = io.sockets.adapter.rooms.get(roomName); // Updated room retrieval
 
         let numClients = room ? room.size : 0; // Get number of players in the room
@@ -44,18 +44,20 @@ io.on("connection", (socket) => {
 
         serverRooms[socket.id] = roomName;
 
+        state[roomName] = {...state[roomName], 2: {deck: playerDeck, board: [null, null, null]}}; 
+
         socket.join(roomName);
         socket.number = 2;
         socket.emit("init", 2);
 
     }
 
-    function handleNewGame() {
+    function handleNewGame(playerDeck) {
         let roomName = makeid(3);
         serverRooms[socket.id] = roomName;
         socket.emit("gameCode", roomName);
 
-        state[roomName] = {}; // Placeholder for game state
+        state[roomName] = {1: {deck: playerDeck, board: [null, null, null]}}; // Placeholder for game state
 
         socket.join(roomName);
         socket.number = 1;

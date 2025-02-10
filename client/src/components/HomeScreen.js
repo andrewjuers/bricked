@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Card from "./Card";
 import cardsData from "../data/cards.json"; // Import JSON data
 import "./HomeScreen.css";
@@ -9,19 +9,12 @@ const socket = io.connect("https://bricked.onrender.com", {
     transports: ["websocket"],
 });
 
-function HomeScreen({ onSelectionComplete, startBattle, room, setRoom }) {
+function HomeScreen({ onSelectionComplete, goLobby }) {
     const [selectedCards, setSelectedCards] = useState({
         level1: [],
         level2: [],
         level3: [],
     });
-    const [isRoomReady, setIsRoomReady] = useState(false);
-
-    useEffect(() => {
-        socket.on("room_ready", () => {
-            setIsRoomReady(true);
-        });
-    }, []);
 
     const handleCardClick = (card, level) => {
         setSelectedCards((prev) => {
@@ -57,12 +50,6 @@ function HomeScreen({ onSelectionComplete, startBattle, room, setRoom }) {
             onSelectionComplete(freshSelectedCards);
         } else {
             alert("Please select 3 cards from each level!");
-        }
-    };
-
-    const joinRoom = () => {
-        if (room !== "") {
-            socket.emit("join_room", room);
         }
     };
 
@@ -102,7 +89,7 @@ function HomeScreen({ onSelectionComplete, startBattle, room, setRoom }) {
             ))}
             <button onClick={handleNext}>CPU Battle</button>
             <button
-                onClick={() => startBattle(selectedCards)}
+                onClick={() => goLobby(selectedCards)}
                 disabled={
                     !(
                         selectedCards.level1.length === 3 &&

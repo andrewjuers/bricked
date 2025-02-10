@@ -5,7 +5,7 @@ const socket = io("https://bricked.onrender.com", {
     transports: ["websocket"],
 });
 
-const Lobby = () => {
+const Lobby = ({onGoHome, startMultiBattle, playerDeck}) => {
     const [playerNumber, setPlayerNumber] = useState("NOT IN GAME");
     const [roomId, setRoomId] = useState("NOT IN GAME");
     const [joinCode, setJoinCode] = useState("");
@@ -17,8 +17,10 @@ const Lobby = () => {
 
         const handleInit = (number) => {
             setPlayerNumber(number);
-            if (number === 2) alert("Success!");
+            if (number === 2) startMultiBattle();
         };
+
+        
 
         socket.on("gameCode", handleGameCode);
         socket.on("init", handleInit);
@@ -30,17 +32,18 @@ const Lobby = () => {
     }, []);
 
     const newGame = () => {
-        socket.emit("newGame");
+        socket.emit("newGame", playerDeck);
     };
 
     const joinGame = () => {
         if (joinCode.trim() !== "") {
-            socket.emit("joinGame", joinCode);
+            socket.emit("joinGame", joinCode, playerDeck);
         }
     };
 
     return (
         <div>
+            <button onClick={onGoHome}>Back to Home</button>
             <h1>Player Number: {playerNumber}</h1>
             <h1>Game Code: {roomId}</h1>
             <button onClick={newGame}>New Game</button>
