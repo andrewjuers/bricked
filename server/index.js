@@ -63,3 +63,10 @@ io.on("connection", (socket) => {
         socket.emit("init", 1);
     }
 });
+
+const PORT = process.env.PORT || 3001; // Never hardcode 3000 for Render
+
+server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
+

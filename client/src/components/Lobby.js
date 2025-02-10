@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { io } from "socket.io-client";
 
-const socket = io.connect("https://bricked.onrender.com", {
+const socket = io("https://bricked.onrender.com", {
     transports: ["websocket"],
 });
 
@@ -10,18 +10,26 @@ const Lobby = () => {
     const [roomId, setRoomId] = useState("NOT IN GAME");
 
     useEffect(() => {
-        socket.on("gameCode", (code) => {
+        const handleGameCode = (code) => {
             setRoomId(code);
-        });
+        };
 
-        socket.on("init", (number) => {
+        const handleInit = (number) => {
             setPlayerNumber(number);
-        });
+        };
+
+        socket.on("gameCode", handleGameCode);
+        socket.on("init", handleInit);
+
+        return () => {
+            socket.off("gameCode", handleGameCode);
+            socket.off("init", handleInit);
+        };
     }, []);
 
     const newGame = () => {
         socket.emit("newGame");
-    }
+    };
 
     return (
         <div>
