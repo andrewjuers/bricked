@@ -4,8 +4,9 @@ module.exports = {
 
 function makeid(length) {
     var result = "";
-    var characters =
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    //var characters =
+    //    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    var characters = "1234567890";
     var charactersLength = characters.length;
     for (var i = 0; i < length; i++) {
         result += characters.charAt(

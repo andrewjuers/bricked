@@ -48,11 +48,10 @@ io.on("connection", (socket) => {
         socket.number = 2;
         socket.emit("init", 2);
 
-        startGameInterval(roomName);
     }
 
     function handleNewGame() {
-        let roomName = makeid(5);
+        let roomName = makeid(3);
         serverRooms[socket.id] = roomName;
         socket.emit("gameCode", roomName);
 
