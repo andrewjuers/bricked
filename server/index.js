@@ -84,8 +84,15 @@ io.on("connection", (socket) => {
 
         const otherPlayerNumber = (playerObj.playerNumber === 1) ? 2 : 1;
 
-        setTimeout(() => {
-            if (state[roomName][otherPlayerNumber].done) {
+        waitForBothPlayers();
+    }
+
+    function waitForBothPlayers() {
+        const roomName = serverRooms[socket.id];
+        if (!roomName) return;
+        
+        const interval = setInterval(() => {
+            if (state[roomName][1].done && state[roomName][2].done) {
                 const { updatedPlayerCards, updatedEnemyCards } =
                     handleBattleTurn(
                         state[roomName][1].board,
@@ -96,8 +103,9 @@ io.on("connection", (socket) => {
                 state[roomName][1].done = false;
                 state[roomName][2].done = false;
                 io.to(roomName).emit("do-turn", state[roomName]);
+                clearInterval(interval); // Clear the interval once the battle happens
             }
-        }, 50); // 50ms should be enough, but you can tweak it
+        }, 50); // 50ms check interval
     }
 });
 

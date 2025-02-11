@@ -234,10 +234,16 @@ const MultiplayerBattle = ({ playerDeck, playerNumber, onGoHome }) => {
 
     useEffect(() => {
         startTurn();
+        setIsEndTurnDisabled(false);
     }, [turn]);
 
     useEffect(() => {
-        socket.on("do-turn", doTurn);
+        const handleDoTurn = (state) => {
+            console.log("working");
+            doTurn(state);
+        }
+
+        socket.on("do-turn", handleDoTurn);
 
         return () => {
             socket.off("do-turn", doTurn);
@@ -248,12 +254,6 @@ const MultiplayerBattle = ({ playerDeck, playerNumber, onGoHome }) => {
         setIsEndTurnDisabled(true); // Disable button on click
         sendEndTurn();
     };
-
-    useEffect(() => {
-        if (isEndTurnDisabled && turn > 1) {
-            setIsEndTurnDisabled(false); // Re-enable the button after turn is done
-        }
-    }, [turn]);
 
     return (
         <div>
