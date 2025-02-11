@@ -120,20 +120,16 @@ const MultiplayerBattle = ({ playerDeck, playerNumber, roomId, onGoHome }) => {
     const handleEndTurn = () => {
         setTurn(turn + 1);
 
-        // Load the next level of cards if the hand is empty
-        if (hand.length === 0) {
-            if (currentLevel === 1 && playerDeck.level2) {
-                setHand([...playerDeck.level2]);
-                setCurrentLevel(2);
-            } else if (currentLevel === 2 && playerDeck.level3) {
-                setHand([...playerDeck.level3]);
-                setCurrentLevel(3);
-            }
+        if (currentLevel === 1 && playerDeck.level2) {
+            setHand([...playerDeck.level2]);
+            setCurrentLevel(2);
+        } else if (currentLevel === 2 && playerDeck.level3) {
+            setHand([...playerDeck.level3]);
+            setCurrentLevel(3);
         }
     };
 
     const doTurn = (state) => {
-        console.log(state);
         const [updatedPlayerCards, updatedEnemyCards] =
             playerNumber === 1
                 ? [state["1"].board, state["2"].board]
@@ -244,7 +240,6 @@ const MultiplayerBattle = ({ playerDeck, playerNumber, roomId, onGoHome }) => {
     useEffect(() => {
         const handleDoTurn = (state) => {
             doTurn(state);
-            console.log("doing turn...");
         };
 
         socket.on("do-turn", handleDoTurn);
