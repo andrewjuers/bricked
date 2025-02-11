@@ -51,6 +51,7 @@ io.on("connection", (socket) => {
             2: { deck: playerDeck, board: [null, null, null] },
         };
 
+        socket.emit("gameCode", roomName);
         socket.join(roomName);
         socket.number = 2;
         socket.emit("init", 2);
