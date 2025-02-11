@@ -166,7 +166,6 @@ const MultiplayerBattle = ({ playerDeck, playerNumber, roomId, onGoHome }) => {
                     : null,
         });
         handleEndTurn();
-        startTurn();
         if (turn <= 2) return;
         // Check end condition
         const playerSlotsEmpty = updatedPlayerCards.every(
