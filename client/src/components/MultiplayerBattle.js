@@ -133,10 +133,11 @@ const MultiplayerBattle = ({ playerDeck, playerNumber, roomId, onGoHome }) => {
     };
 
     const doTurn = (state) => {
+        console.log(state);
         const [updatedPlayerCards, updatedEnemyCards] =
             playerNumber === 1
-                ? [state[1].board, state[2].board]
-                : [state[2].board, state[1].board];
+                ? [state["1"].board, state["2"].board]
+                : [state["2"].board, state["1"].board];
         // Update the grid slots with the new card states
         setGrid({
             slot1:
