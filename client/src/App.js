@@ -1,15 +1,10 @@
 import React, { useState } from "react";
 import "./App.css";
-import io from "socket.io-client";
 import HomeScreen from "./components/HomeScreen";
 import Battle from "./components/Battle";
 import { generateOpponentDeck } from "./logic/computerOpponentLogic";
 import MultiplayerBattle from "./components/MultiplayerBattle";
 import Lobby from "./components/Lobby";
-
-const socket = io.connect("https://bricked.onrender.com", {
-    transports: ["websocket"],
-});
 
 function App() {
     const [currentScreen, setCurrentScreen] = useState("home");
