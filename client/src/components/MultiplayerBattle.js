@@ -160,6 +160,7 @@ const MultiplayerBattle = ({ playerDeck, playerNumber, onGoHome }) => {
                     ? updatedEnemyCards[2]
                     : null,
         });
+        handleEndTurn();
         if (turn <= 2) return;
         // Check end condition
         const playerSlotsEmpty = updatedPlayerCards.every(
@@ -174,7 +175,6 @@ const MultiplayerBattle = ({ playerDeck, playerNumber, onGoHome }) => {
             setGameResult(playerSlotsEmpty ? "Defeat" : "Victory");
             if (playerSlotsEmpty && opponentSlotsEmpty) setGameResult("Tie!!!");
         }
-        handleEndTurn();
     };
 
     const resetTurn = () => {
