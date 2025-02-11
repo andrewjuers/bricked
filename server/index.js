@@ -98,7 +98,7 @@ io.on("connection", (socket) => {
                 state[roomName][2].board = updatedEnemyCards;
                 state[roomName][1].done = false;
                 state[roomName][2].done = false;
-                socket.emit("do-turn", state[roomName]);
+                io.to(roomName).emit("do-turn", state[roomName]);
             }
         }, 50);
     }
