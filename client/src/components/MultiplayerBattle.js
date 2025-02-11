@@ -2,14 +2,13 @@ import React, { useState, useEffect } from "react";
 import BattleGrid from "./BattleGrid";
 import Card from "./Card";
 import "./Battle.css";
-import { handleBattleTurn } from "../logic/battleLogic";
 import { io } from "socket.io-client";
 
 const socket = io("https://bricked.onrender.com", {
     transports: ["websocket"],
 });
 
-const MultiplayerBattle = ({ playerDeck, onGoHome }) => {
+const MultiplayerBattle = ({ playerDeck, playerNumber, onGoHome }) => {
     const [hand, setHand] = useState([...playerDeck.level1]); // Player's current hand
     const [grid, setGrid] = useState({
         slot1: null,
@@ -106,7 +105,14 @@ const MultiplayerBattle = ({ playerDeck, onGoHome }) => {
         }
     };
 
-    const handleEndTurn = () => {       
+    const sendEndTurn = () => {
+        socket.emit("end-turn", {
+            playerNumber: playerNumber,
+            board: [grid.slot1, grid.slot2, grid.slot3],
+        });
+    };
+
+    const handleEndTurn = () => {
         setTurn(turn + 1);
 
         // Load the next level of cards if the hand is empty
@@ -121,12 +127,11 @@ const MultiplayerBattle = ({ playerDeck, onGoHome }) => {
         }
     };
 
-    const doTurn = () => {
-        const { updatedPlayerCards, updatedEnemyCards } = handleBattleTurn(
-            [grid.slot1, grid.slot2, grid.slot3],
-            [grid.slot4, grid.slot5, grid.slot6]
-        );
-
+    const doTurn = (state) => {
+        const [updatedPlayerCards, updatedEnemyCards] =
+            playerNumber === 1
+                ? [state[1].board, state[2].board]
+                : [state[2].board, state[1].board];
         // Update the grid slots with the new card states
         setGrid({
             slot1:
@@ -229,6 +234,14 @@ const MultiplayerBattle = ({ playerDeck, onGoHome }) => {
         startTurn();
     }, [turn]);
 
+    useEffect(() => {
+        socket.on("do-turn", doTurn);
+
+        return () => {
+            socket.off("do-turn", doTurn);
+        };
+    }, []);
+
     return (
         <div>
             {gameOver && (
@@ -268,7 +281,7 @@ const MultiplayerBattle = ({ playerDeck, onGoHome }) => {
             {/* Action Buttons */}
             <div className="action-buttons">
                 <button
-                    onClick={handleEndTurn}
+                    onClick={sendEndTurn}
                     disabled={
                         (Object.values(grid)
                             .slice(0, 3)

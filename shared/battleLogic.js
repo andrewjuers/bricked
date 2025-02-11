@@ -1,3 +1,5 @@
+// Duplicate file because I'm lazy and can't find a better solution
+
 // shared/battleLogic.js
 
 const handleCardAbilitiesBefore = (cards, opponentCards) => {
@@ -109,7 +111,7 @@ const applyThorns = (card) => {
     return 0; // No thorns, return 0 damage
 };
 
-export const handleBattleTurn = (playerCards, enemyCards) => {
+const handleBattleTurn = (playerCards, enemyCards) => {
     // Assumes playerCards and enemyCards are arrays of cards in each lane
     let updatedPlayerCards = [...playerCards];
     let updatedEnemyCards = [...enemyCards];
@@ -173,4 +175,8 @@ export const handleBattleTurn = (playerCards, enemyCards) => {
         updatedPlayerCards,
         updatedEnemyCards,
     };
+};
+
+module.exports = {
+    handleBattleTurn,
 };

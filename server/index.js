@@ -4,6 +4,7 @@ const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
 const { makeid } = require("./utils");
+const { handleBattleTurn } = require("../shared/battleLogic");
 
 app.use(cors());
 
@@ -28,6 +29,7 @@ io.on("connection", (socket) => {
 
     socket.on("newGame", handleNewGame);
     socket.on("joinGame", handleJoinGame);
+    socket.on("end-turn", handleEndTurn);
 
     function handleJoinGame(roomName, playerDeck) {
         const room = io.sockets.adapter.rooms.get(roomName); // Updated room retrieval
@@ -60,11 +62,32 @@ io.on("connection", (socket) => {
         serverRooms[socket.id] = roomName;
         socket.emit("gameCode", roomName);
 
-        state[roomName] = {1: {deck: playerDeck, board: [null, null, null]}}; // Placeholder for game state
+        state[roomName] = {1: {deck: playerDeck, board: [null, null, null], done: false}}; // Placeholder for game state
 
         socket.join(roomName);
         socket.number = 1;
         socket.emit("init", 1);
+    }
+
+    // MULTI-PLAYER BATTLE
+    function handleEndTurn(playerObj) {
+        const roomName = serverRooms[socket.id];
+        if (!roomName) return;
+
+        state[roomName][playerObj.playerNumber].board = playerObj.board;
+        state[roomName][playerObj.playerNumber].done = true;
+
+        if (state[roomName][1].done && state[roomName][2].done) {
+            const { updatedPlayerCards, updatedEnemyCards } = handleBattleTurn(
+                state[roomName][1].board,
+                state[roomName][2].board
+            );
+            state[roomName][1].board = updatedPlayerCards;
+            state[roomName][2].board = updatedEnemyCards;
+            state[roomName][1].done = false;
+            state[roomName][2].done = false;
+            io.to(roomName).emit("do-turn", state[roomName]);
+        }
     }
 });
 

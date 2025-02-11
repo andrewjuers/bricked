@@ -15,6 +15,7 @@ function App() {
     const [currentScreen, setCurrentScreen] = useState("home");
     const [playerDeck, setPlayerDeck] = useState([]);
     const [opponentDeck, setOpponentDeck] = useState(null);
+    const [playerNumber, setPlayerNumber] = useState(null);
 
     const handleSelectionComplete = (selectedCards) => {
         setPlayerDeck(JSON.parse(JSON.stringify(selectedCards)));
@@ -50,8 +51,8 @@ function App() {
                     onGoHome={goHome}
                 />
             )}
-            {currentScreen === "lobby" && <Lobby onGoHome={goHome} startMultiBattle={startMultiBattle} playerDeck={playerDeck}/>}
-            {currentScreen === "multi-battle" && <MultiplayerBattle onGoHome={goHome} playerDeck={playerDeck}/>}
+            {currentScreen === "lobby" && <Lobby onGoHome={goHome} startMultiBattle={startMultiBattle} playerDeck={playerDeck} setPlayerNumber={setPlayerNumber}/>}
+            {currentScreen === "multi-battle" && <MultiplayerBattle onGoHome={goHome} playerDeck={playerDeck} playerNumber={playerNumber}/>}
         </div>
     );
 }
