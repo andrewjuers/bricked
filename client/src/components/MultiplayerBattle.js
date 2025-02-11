@@ -107,11 +107,14 @@ const MultiplayerBattle = ({ playerDeck, playerNumber, roomId, onGoHome }) => {
     };
 
     const sendEndTurn = () => {
-        socket.emit("end-turn", {
-            playerNumber: playerNumber,
-            board: [grid.slot1, grid.slot2, grid.slot3], 
-            roomId: roomId,
-        });
+        socket.emit(
+            "end-turn",
+            {
+                playerNumber: playerNumber,
+                board: [grid.slot1, grid.slot2, grid.slot3],
+            },
+            roomId
+        );
     };
 
     const handleEndTurn = () => {
