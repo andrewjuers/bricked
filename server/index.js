@@ -48,7 +48,7 @@ io.on("connection", (socket) => {
 
         state[roomName] = {
             ...state[roomName],
-            2: { deck: playerDeck, board: [null, null, null] },
+            2: { deck: playerDeck, board: [null, null, null], done: false },
         };
 
         socket.emit("gameCode", roomName);
