@@ -1,107 +1,288 @@
 import React, { useState, useEffect } from "react";
-import { io } from "socket.io-client";
 import BattleGrid from "./BattleGrid";
 import Card from "./Card";
 import "./Battle.css";
 import { handleBattleTurn } from "../logic/battleLogic";
+import { io } from "socket.io-client";
 
-const socket = io.connect("https://bricked.onrender.com", {
+const socket = io("https://bricked.onrender.com", {
     transports: ["websocket"],
 });
 
 const MultiplayerBattle = ({ playerDeck, onGoHome }) => {
-    const [hand, setHand] = useState([...playerDeck.level1]);
+    const [hand, setHand] = useState([...playerDeck.level1]); // Player's current hand
     const [grid, setGrid] = useState({
-        slot1: null, slot2: null, slot3: null,
-        slot4: null, slot5: null, slot6: null,
+        slot1: null,
+        slot2: null,
+        slot3: null,
+        slot4: null,
+        slot5: null,
+        slot6: null,
     });
-    const [opponentHand, setOpponentHand] = useState([]);
     const [turn, setTurn] = useState(1);
-    const [playerId, setPlayerId] = useState(null);
-    const [opponentId, setOpponentId] = useState(null);
-    const [isPlayerTurn, setIsPlayerTurn] = useState(false);
+    const [currentLevel, setCurrentLevel] = useState(1); // Track player's deck level
     const [gameOver, setGameOver] = useState(false);
-    const [gameResult, setGameResult] = useState("");
+    const [gameResult, setGameResult] = useState(""); // "Victory" or "Defeat"
 
-    useEffect(() => {
-        socket.on("connect", () => {
-            setPlayerId(socket.id);
-            socket.emit("joinGame");
-        });
+    // To store the initial state of grid and hand
+    const [initialGrid, setInitialGrid] = useState({});
+    const [initialHand, setInitialHand] = useState([]);
 
-        socket.on("gameStart", ({ opponent, firstTurn }) => {
-            setOpponentId(opponent);
-            setIsPlayerTurn(firstTurn === socket.id);
-        });
+    const normalizeAbilities = (abilities) => {
+        if (!abilities || typeof abilities !== "object") {
+            return {}; // Return an empty object if no abilities
+        }
+        return abilities; // Already normalized as an object
+    };
 
-        socket.on("updateState", (newState) => {
-            setGrid(newState.grid);
-            setOpponentHand(newState.opponentHand);
-            setTurn(newState.turn);
-            setIsPlayerTurn(newState.currentTurn === socket.id);
-        });
-
-        socket.on("gameOver", (result) => {
-            setGameOver(true);
-            setGameResult(result);
-        });
-
-        return () => {
-            socket.off("connect");
-            socket.off("gameStart");
-            socket.off("updateState");
-            socket.off("gameOver");
+    // Function to combine two cards
+    const combineCards = (existingCard, newCard) => {
+        return {
+            id: [
+                ...(Array.isArray(existingCard.id)
+                    ? existingCard.id
+                    : [existingCard.id]),
+                newCard.id,
+            ], // Combine IDs
+            name: `${existingCard.name} + ${newCard.name}`, // Combine names
+            health: Number(existingCard.health) + Number(newCard.health), // Add health
+            attack: existingCard.attack + newCard.attack, // Add attack
+            ability: Object.entries({
+                ...normalizeAbilities(existingCard.ability),
+                ...normalizeAbilities(newCard.ability),
+            }).reduce((acc, [key, value]) => {
+                acc[key] =
+                    (existingCard.ability[key] || 0) +
+                    (newCard.ability[key] || 0);
+                return acc;
+            }, {}), // Merge abilities, adding values for duplicate abilities
+            level: Math.max(existingCard.level, newCard.level), // Max level
+            maxHealth: existingCard.maxHealth + newCard.maxHealth,
         };
-    }, []);
+    };
 
     const handleCardDrop = (slot, card) => {
-        if (!isPlayerTurn) return;
+        // Check if the card is already in a slot
+        const isCardAlreadyInSlot = Object.values(grid).some(
+            (existingCard) =>
+                existingCard &&
+                (existingCard.id === card.id || existingCard.name === card.name)
+        );
 
-        if (grid[slot] === null) {
-            const newGrid = { ...grid, [slot]: card };
-            setGrid(newGrid);
-            setHand((prevHand) => prevHand.filter((c) => c.id !== card.id));
-            socket.emit("playCard", { grid: newGrid, playerId: socket.id });
+        if (isCardAlreadyInSlot) {
+            alert("This card is already placed in a slot!");
+            return;
+        }
+
+        if (grid[slot] === null && ["slot1", "slot2", "slot3"].includes(slot)) {
+            setGrid((prevGrid) => ({
+                ...prevGrid,
+                [slot]: card,
+            }));
+            setHand((prevHand) =>
+                prevHand.filter((item) => item.id !== card.id)
+            );
+        } else if (
+            turn > 1 &&
+            grid[slot] !== null &&
+            ["slot1", "slot2", "slot3"].includes(slot)
+        ) {
+            const existingCard = grid[slot];
+
+            if (existingCard.level !== card.level) {
+                // Combine cards using the reusable combineCards function
+                const combinedCard = combineCards(existingCard, card);
+
+                setGrid((prevGrid) => ({
+                    ...prevGrid,
+                    [slot]: combinedCard,
+                }));
+                setHand((prevHand) =>
+                    prevHand.filter((item) => item.id !== card.id)
+                );
+            } else {
+                alert("Can't do!");
+            }
         }
     };
 
-    const handleEndTurn = () => {
-        if (!isPlayerTurn) return;
+    const handleEndTurn = () => {       
+        setTurn(turn + 1);
 
+        // Load the next level of cards if the hand is empty
+        if (hand.length === 0) {
+            if (currentLevel === 1 && playerDeck.level2) {
+                setHand([...playerDeck.level2]);
+                setCurrentLevel(2);
+            } else if (currentLevel === 2 && playerDeck.level3) {
+                setHand([...playerDeck.level3]);
+                setCurrentLevel(3);
+            }
+        }
+    };
+
+    const doTurn = () => {
         const { updatedPlayerCards, updatedEnemyCards } = handleBattleTurn(
             [grid.slot1, grid.slot2, grid.slot3],
             [grid.slot4, grid.slot5, grid.slot6]
         );
 
-        const newGrid = {
-            slot1: updatedPlayerCards[0]?.health > 0 ? updatedPlayerCards[0] : null,
-            slot2: updatedPlayerCards[1]?.health > 0 ? updatedPlayerCards[1] : null,
-            slot3: updatedPlayerCards[2]?.health > 0 ? updatedPlayerCards[2] : null,
-            slot4: updatedEnemyCards[0]?.health > 0 ? updatedEnemyCards[0] : null,
-            slot5: updatedEnemyCards[1]?.health > 0 ? updatedEnemyCards[1] : null,
-            slot6: updatedEnemyCards[2]?.health > 0 ? updatedEnemyCards[2] : null,
-        };
+        // Update the grid slots with the new card states
+        setGrid({
+            slot1:
+                updatedPlayerCards[0] && updatedPlayerCards[0].health > 0
+                    ? updatedPlayerCards[0]
+                    : null,
+            slot2:
+                updatedPlayerCards[1] && updatedPlayerCards[1].health > 0
+                    ? updatedPlayerCards[1]
+                    : null,
+            slot3:
+                updatedPlayerCards[2] && updatedPlayerCards[2].health > 0
+                    ? updatedPlayerCards[2]
+                    : null,
+            slot4:
+                updatedEnemyCards[0] && updatedEnemyCards[0].health > 0
+                    ? updatedEnemyCards[0]
+                    : null,
+            slot5:
+                updatedEnemyCards[1] && updatedEnemyCards[1].health > 0
+                    ? updatedEnemyCards[1]
+                    : null,
+            slot6:
+                updatedEnemyCards[2] && updatedEnemyCards[2].health > 0
+                    ? updatedEnemyCards[2]
+                    : null,
+        });
+        if (turn <= 2) return;
+        // Check end condition
+        const playerSlotsEmpty = updatedPlayerCards.every(
+            (card) => card === null || card.health === 0
+        );
+        const opponentSlotsEmpty = updatedEnemyCards.every(
+            (card) => card === null || card.health === 0
+        );
 
-        socket.emit("endTurn", {
-            grid: newGrid,
-            turn: turn + 1,
-            playerId: socket.id,
+        if (playerSlotsEmpty || opponentSlotsEmpty) {
+            setGameOver(true);
+            setGameResult(playerSlotsEmpty ? "Defeat" : "Victory");
+            if (playerSlotsEmpty && opponentSlotsEmpty) setGameResult("Tie!!!");
+        }
+    };
+
+    const resetTurn = () => {
+        // On turn 1, reset the grid to null slots
+        if (turn === 1) {
+            setGrid({
+                slot1: null,
+                slot2: null,
+                slot3: null,
+                slot4: null,
+                slot5: null,
+                slot6: null,
+            });
+        } else {
+            // On turn 2 and beyond, reset to the initial state of the grid
+            setGrid((prevGrid) => {
+                let newGrid = { ...initialGrid }; // Start with the initial grid
+                // Loop through each slot and nullify dead cards
+                Object.keys(newGrid).forEach((slot) => {
+                    if (prevGrid[slot]?.health <= 0) {
+                        newGrid[slot] = null;
+                    }
+                });
+
+                return newGrid;
+            });
+        }
+        // Reset the hand to the original hand for this turn
+        setHand(initialHand);
+    };
+
+    const startTurn = () => {
+        // Save the initial state of grid and hand at the start of the turn
+        setInitialGrid(() => {
+            let newGrid = { ...grid }; // Start with the initial grid
+            // Loop through each slot and nullify dead cards
+            Object.keys(grid).forEach((slot) => {
+                if (grid[slot]?.health === 0) {
+                    newGrid[slot] = null;
+                }
+            });
+            return newGrid;
+        });
+        setInitialHand(hand);
+        if (turn > 1) doTurn();
+    };
+
+    const swapCards = (slotA, slotB) => {
+        setGrid((prevGrid) => {
+            const newGrid = { ...prevGrid };
+            const temp = newGrid[slotA];
+            newGrid[slotA] = newGrid[slotB];
+            newGrid[slotB] = temp;
+            return newGrid;
         });
     };
 
+    useEffect(() => {
+        startTurn();
+    }, [turn]);
+
     return (
-        <div className="battle-container">
-            <h2>{isPlayerTurn ? "Your Turn" : "Opponent's Turn"}</h2>
-            <BattleGrid grid={grid} onCardDrop={handleCardDrop} />
-            <div className="hand">
+        <div>
+            {gameOver && (
+                <div>
+                    <h1>Game Over</h1>
+                    <h2>{gameResult}</h2>
+                </div>
+            )}
+            <button onClick={onGoHome}>Back to Home</button>
+            <h2>Turn {turn}</h2>
+            {/* Combined Player and Opponent Grid */}
+            <BattleGrid grid={grid} onCardDrop={handleCardDrop} turn={turn} />
+
+            {/* Swap Position Buttons */}
+            <div>
+                <button
+                    onClick={() => swapCards("slot1", "slot2")}
+                    disabled={gameOver}
+                >
+                    Swap Slots 1 & 2
+                </button>
+                <button
+                    onClick={() => swapCards("slot2", "slot3")}
+                    disabled={gameOver}
+                >
+                    Swap Slots 2 & 3
+                </button>
+            </div>
+
+            {/* Render Player's Cards Below the Grid */}
+            <div className="player-cards">
                 {hand.map((card) => (
-                    <Card key={card.id} card={card} onCardDrop={handleCardDrop} />
+                    <Card key={card.id} card={card} />
                 ))}
             </div>
-            <button onClick={handleEndTurn} disabled={!isPlayerTurn}>
-                End Turn
-            </button>
-            {gameOver && <h3>{gameResult}</h3>}
+
+            {/* Action Buttons */}
+            <div className="action-buttons">
+                <button
+                    onClick={handleEndTurn}
+                    disabled={
+                        (Object.values(grid)
+                            .slice(0, 3)
+                            .some((slot) => slot === null) &&
+                            hand.length > 0) ||
+                        gameOver
+                    }
+                >
+                    End Turn
+                </button>
+                <button onClick={resetTurn} disabled={gameOver}>
+                    Reset Turn
+                </button>
+            </div>
         </div>
     );
 };

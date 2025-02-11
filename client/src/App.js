@@ -51,7 +51,7 @@ function App() {
                 />
             )}
             {currentScreen === "lobby" && <Lobby onGoHome={goHome} startMultiBattle={startMultiBattle} playerDeck={playerDeck}/>}
-            {currentScreen === "multi-battle" && <MultiplayerBattle onGoHome={goHome}/>}
+            {currentScreen === "multi-battle" && <MultiplayerBattle onGoHome={goHome} playerDeck={playerDeck}/>}
         </div>
     );
 }
