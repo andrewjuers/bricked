@@ -8,7 +8,7 @@ const socket = io("https://bricked.onrender.com", {
     transports: ["websocket"],
 });
 
-const MultiplayerBattle = ({ playerDeck, playerNumber, onGoHome }) => {
+const MultiplayerBattle = ({ playerDeck, playerNumber, roomId, onGoHome }) => {
     const [hand, setHand] = useState([...playerDeck.level1]); // Player's current hand
     const [grid, setGrid] = useState({
         slot1: null,
@@ -109,9 +109,9 @@ const MultiplayerBattle = ({ playerDeck, playerNumber, onGoHome }) => {
     const sendEndTurn = () => {
         socket.emit("end-turn", {
             playerNumber: playerNumber,
-            board: [grid.slot1, grid.slot2, grid.slot3],
+            board: [grid.slot1, grid.slot2, grid.slot3], 
+            roomId: roomId,
         });
-        console.log("sending end turn...");
     };
 
     const handleEndTurn = () => {
@@ -128,13 +128,6 @@ const MultiplayerBattle = ({ playerDeck, playerNumber, onGoHome }) => {
             }
         }
     };
-
-    const clientTurn = (state) => {
-        console.log("clientTurn");
-        if (state[1].done && state[2].done) {
-            socket.emit("server-turn");
-        }
-    } 
 
     const doTurn = (state) => {
         const [updatedPlayerCards, updatedEnemyCards] =
@@ -247,16 +240,13 @@ const MultiplayerBattle = ({ playerDeck, playerNumber, onGoHome }) => {
 
     useEffect(() => {
         const handleDoTurn = (state) => {
-            console.log("working");
             doTurn(state);
-        }
+        };
 
         socket.on("do-turn", handleDoTurn);
-        socket.on("client-turn", clientTurn);
 
         return () => {
             socket.off("do-turn", handleDoTurn);
-            socket.off("client-turn", clientTurn);
         };
     }, []);
 
@@ -305,15 +295,21 @@ const MultiplayerBattle = ({ playerDeck, playerNumber, onGoHome }) => {
             <div className="action-buttons">
                 <button
                     onClick={handleEndTurnButtonClick}
-                    disabled={isEndTurnDisabled || 
+                    disabled={
+                        isEndTurnDisabled ||
                         (Object.values(grid)
                             .slice(0, 3)
-                            .some((slot) => slot === null) && hand.length > 0) || 
-                        gameOver}
+                            .some((slot) => slot === null) &&
+                            hand.length > 0) ||
+                        gameOver
+                    }
                 >
                     End Turn
                 </button>
-                <button onClick={resetTurn} disabled={gameOver || isEndTurnDisabled}>
+                <button
+                    onClick={resetTurn}
+                    disabled={gameOver || isEndTurnDisabled}
+                >
                     Reset Turn
                 </button>
             </div>

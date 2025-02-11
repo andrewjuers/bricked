@@ -5,8 +5,7 @@ const socket = io("https://bricked.onrender.com", {
     transports: ["websocket"],
 });
 
-const Lobby = ({onGoHome, startMultiBattle, playerDeck, setPlayerNumber}) => {
-    const [roomId, setRoomId] = useState("NOT IN GAME");
+const Lobby = ({onGoHome, startMultiBattle, playerDeck, setPlayerNumber, roomId, setRoomId}) => {
     const [joinCode, setJoinCode] = useState("");
 
     useEffect(() => {

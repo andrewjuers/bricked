@@ -30,7 +30,6 @@ io.on("connection", (socket) => {
     socket.on("newGame", handleNewGame);
     socket.on("joinGame", handleJoinGame);
     socket.on("end-turn", handleEndTurn);
-    socket.on("server-turn", handleServerTurn);
 
     function handleJoinGame(roomName, playerDeck) {
         const room = io.sockets.adapter.rooms.get(roomName); // Updated room retrieval
@@ -76,27 +75,26 @@ io.on("connection", (socket) => {
     }
 
     // MULTI-PLAYER BATTLE
-    function handleEndTurn(playerObj) {
-        const roomName = serverRooms[socket.id];
-        console.log(roomName);
+    function handleEndTurn(playerObj, roomId) {
+        const roomName = serverRooms[roomId];
         if (!roomName) return;
 
         state[roomName][playerObj.playerNumber].board = playerObj.board;
         state[roomName][playerObj.playerNumber].done = true;
 
-        io.to(roomName).emit("client-turn", state[roomName]);
-    }
+        const otherPlayerNumber = playerObj.playerNumber === 1 ? 2 : 1;
 
-    function handleServerTurn() {
-        const { updatedPlayerCards, updatedEnemyCards } = handleBattleTurn(
-            state[roomName][1].board,
-            state[roomName][2].board
-        );
-        state[roomName][1].board = updatedPlayerCards;
-        state[roomName][2].board = updatedEnemyCards;
-        state[roomName][1].done = false;
-        state[roomName][2].done = false;
-        io.to(roomName).emit("do-turn", state[roomName]);
+        if (state[roomName][otherPlayerNumber].done) {
+            const { updatedPlayerCards, updatedEnemyCards } = handleBattleTurn(
+                state[roomName][1].board,
+                state[roomName][2].board
+            );
+            state[roomName][1].board = updatedPlayerCards;
+            state[roomName][2].board = updatedEnemyCards;
+            state[roomName][1].done = false;
+            state[roomName][2].done = false;
+            io.to(roomName).emit("do-turn", state[roomName]);
+        }
     }
 });
 
