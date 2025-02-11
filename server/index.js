@@ -78,8 +78,8 @@ io.on("connection", (socket) => {
     // MULTI-PLAYER BATTLE
     function handleEndTurn(playerObj, roomId) {
         const roomName = roomId;
-        console.log(state[roomId]);
         if (!state[roomName]) return;
+        socket.join(roomName);
 
         state[roomName][playerObj.playerNumber].board = playerObj.board;
         state[roomName][playerObj.playerNumber].done = true;
@@ -98,7 +98,7 @@ io.on("connection", (socket) => {
                 state[roomName][2].board = updatedEnemyCards;
                 state[roomName][1].done = false;
                 state[roomName][2].done = false;
-                io.to(roomName).emit("do-turn", state[roomName]);
+                socket.emit("do-turn", state[roomName]);
             }
         }, 50);
     }

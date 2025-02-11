@@ -244,6 +244,7 @@ const MultiplayerBattle = ({ playerDeck, playerNumber, roomId, onGoHome }) => {
     useEffect(() => {
         const handleDoTurn = (state) => {
             doTurn(state);
+            console.log("doing turn...");
         };
 
         socket.on("do-turn", handleDoTurn);
