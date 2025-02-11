@@ -118,16 +118,16 @@ const MultiplayerBattle = ({ playerDeck, playerNumber, roomId, onGoHome }) => {
     };
 
     const handleEndTurn = () => {
-        setTurn(turn + 1);
-
-        if (currentLevel === 1 && playerDeck.level2) {
-            setHand([...playerDeck.level2]);
-            setCurrentLevel(2);
-        } else if (currentLevel === 2 && playerDeck.level3) {
-            setHand([...playerDeck.level3]);
-            setCurrentLevel(3);
-        }
-    };
+        setTurn((prevTurn) => {
+            const newTurn = prevTurn + 1;
+            if (newTurn === 2) {
+                setHand([...playerDeck.level2]);
+            } else if (newTurn === 3) {
+                setHand([...playerDeck.level3]);
+            }
+            return newTurn;
+        });
+    };    
 
     const doTurn = (state) => {
         const [updatedPlayerCards, updatedEnemyCards] =
