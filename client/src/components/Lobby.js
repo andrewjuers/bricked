@@ -17,17 +17,20 @@ const Lobby = ({onGoHome, startMultiBattle, playerDeck}) => {
 
         const handleInit = (number) => {
             setPlayerNumber(number);
-            if (number === 2) startMultiBattle();
-        };
+        };        
 
-        
+        const startBattle = () => {
+            startMultiBattle();
+        }
 
         socket.on("gameCode", handleGameCode);
         socket.on("init", handleInit);
+        socket.on("start-battle", startBattle);
 
         return () => {
             socket.off("gameCode", handleGameCode);
             socket.off("init", handleInit);
+            socket.off("start-battle", startBattle);
         };
     }, []);
 
