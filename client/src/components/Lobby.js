@@ -5,7 +5,14 @@ const socket = io("https://bricked.onrender.com", {
     transports: ["websocket"],
 });
 
-const Lobby = ({onGoHome, startMultiBattle, playerDeck, setPlayerNumber, roomId, setRoomId}) => {
+const Lobby = ({
+    onGoHome,
+    startMultiBattle,
+    playerDeck,
+    setPlayerNumber,
+    roomId,
+    setRoomId,
+}) => {
     const [joinCode, setJoinCode] = useState("");
 
     useEffect(() => {
@@ -15,11 +22,11 @@ const Lobby = ({onGoHome, startMultiBattle, playerDeck, setPlayerNumber, roomId,
 
         const handleInit = (number) => {
             setPlayerNumber(number);
-        };        
+        };
 
         const startBattle = () => {
             startMultiBattle();
-        }
+        };
 
         socket.on("gameCode", handleGameCode);
         socket.on("init", handleInit);
@@ -30,6 +37,7 @@ const Lobby = ({onGoHome, startMultiBattle, playerDeck, setPlayerNumber, roomId,
             socket.off("init", handleInit);
             socket.off("start-battle", startBattle);
         };
+        // eslint-disable-next-line
     }, []);
 
     const newGame = () => {

@@ -19,7 +19,6 @@ const MultiplayerBattle = ({ playerDeck, playerNumber, roomId, onGoHome }) => {
         slot6: null,
     });
     const [turn, setTurn] = useState(1);
-    const [currentLevel, setCurrentLevel] = useState(1); // Track player's deck level
     const [gameOver, setGameOver] = useState(false);
     const [gameResult, setGameResult] = useState(""); // "Victory" or "Defeat"
     const [isEndTurnDisabled, setIsEndTurnDisabled] = useState(false); // Disable end turn button
@@ -127,7 +126,7 @@ const MultiplayerBattle = ({ playerDeck, playerNumber, roomId, onGoHome }) => {
             }
             return newTurn;
         });
-    };    
+    };
 
     const doTurn = (state) => {
         const [updatedPlayerCards, updatedEnemyCards] =
@@ -235,6 +234,7 @@ const MultiplayerBattle = ({ playerDeck, playerNumber, roomId, onGoHome }) => {
     useEffect(() => {
         startTurn();
         setIsEndTurnDisabled(false);
+        // eslint-disable-next-line
     }, [turn]);
 
     useEffect(() => {
@@ -247,6 +247,7 @@ const MultiplayerBattle = ({ playerDeck, playerNumber, roomId, onGoHome }) => {
         return () => {
             socket.off("do-turn", handleDoTurn);
         };
+        // eslint-disable-next-line
     }, []);
 
     const handleEndTurnButtonClick = () => {

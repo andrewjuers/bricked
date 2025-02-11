@@ -3,11 +3,6 @@ import Card from "./Card";
 import cardsData from "../data/cards.json"; // Import JSON data
 import "./HomeScreen.css";
 import Chatbox from "./ChatBox";
-import { io } from "socket.io-client";
-
-const socket = io.connect("https://bricked.onrender.com", {
-    transports: ["websocket"],
-});
 
 function HomeScreen({ onSelectionComplete, goLobby }) {
     const [selectedCards, setSelectedCards] = useState({

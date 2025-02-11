@@ -14,7 +14,9 @@ const Battle = ({ playerDeck, opponentDeck, onGoHome }) => {
         slot5: null,
         slot6: null,
     });
-    const [opponentCards, setOpponentCards] = useState([...opponentDeck.level1]);
+    const [opponentCards, setOpponentCards] = useState([
+        ...opponentDeck.level1,
+    ]);
     const [turn, setTurn] = useState(1);
     const [currentLevel, setCurrentLevel] = useState(1); // Track player's deck level
     const [gameOver, setGameOver] = useState(false);
@@ -129,15 +131,15 @@ const Battle = ({ playerDeck, opponentDeck, onGoHome }) => {
             return newGrid;
         });
 
-        // Update for the next turn
-        if (opponentCards.length === 0) {
-            if (currentLevel === 1 && opponentDeck.level2) {
-                setOpponentCards([...opponentDeck.level2]);
-            } else if (currentLevel === 2 && opponentDeck.level3) {
-                setOpponentCards([...opponentDeck.level3]);
-            }
-        }        
         setTurn(turn + 1);
+
+        // Update for the next turn
+        setOpponentCards([]);
+        if (currentLevel === 1 && opponentDeck.level2) {
+            setOpponentCards([...opponentDeck.level2]);
+        } else if (currentLevel === 2 && opponentDeck.level3) {
+            setOpponentCards([...opponentDeck.level3]);
+        }
 
         // Load the next level of cards if the hand is empty
         if (hand.length === 0) {
@@ -257,6 +259,7 @@ const Battle = ({ playerDeck, opponentDeck, onGoHome }) => {
 
     useEffect(() => {
         startTurn();
+        // eslint-disable-next-line
     }, [turn]);
 
     return (

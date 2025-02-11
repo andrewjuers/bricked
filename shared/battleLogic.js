@@ -40,7 +40,11 @@ const handleCardAbilitiesBefore = (cards, opponentCards) => {
                 card.ability?.["Right Attack"] &&
                 opponentCards[i + 1]
             ) {
-                opponentCards[i + 1].health -= card.ability["Right Attack"];
+                applyDamage(
+                    card,
+                    opponentCards[i + 1],
+                    card.ability["Right Attack"]
+                );
             }
 
             // Left Attack
@@ -49,18 +53,28 @@ const handleCardAbilitiesBefore = (cards, opponentCards) => {
                 card.ability?.["Left Attack"] &&
                 opponentCards[i - 1]
             ) {
-                opponentCards[i - 1].health -= card.ability["Left Attack"];
+                applyDamage(
+                    card,
+                    opponentCards[i - 1],
+                    card.ability["Left Attack"]
+                );
             }
 
             // Adjacent Attack
             if (card.ability?.["Adjacent Attack"]) {
                 if (i < 2 && opponentCards[i + 1]) {
-                    opponentCards[i + 1].health -=
-                        card.ability["Adjacent Attack"] / 2;
+                    applyDamage(
+                        card,
+                        opponentCards[i + 1],
+                        card.ability["Adjacent Attack"] / 2
+                    );
                 }
                 if (i > 0 && opponentCards[i - 1]) {
-                    opponentCards[i - 1].health -=
-                        card.ability["Adjacent Attack"] / 2;
+                    applyDamage(
+                        card,
+                        opponentCards[i - 1],
+                        card.ability["Adjacent Attack"] / 2
+                    );
                 }
             }
 
@@ -68,7 +82,11 @@ const handleCardAbilitiesBefore = (cards, opponentCards) => {
             if (card.ability?.["Sweep Attack"]) {
                 opponentCards.forEach((opponentCard) => {
                     if (opponentCard) {
-                        opponentCard.health -= card.ability["Sweep Attack"] / 3;
+                        applyDamage(
+                            card,
+                            opponentCard,
+                            card.ability["Sweep Attack"] / 3
+                        );
                     }
                 });
             }
@@ -88,6 +106,11 @@ const handleCardAbilitiesAfter = (cards) => {
         }
 
         // Apply other "after battle" abilities here if needed
+
+        // Remove one time use abilities, like shield
+        if (card.ability?.["Shield"]) {
+            delete card.ability["Shield"];
+        }
 
         return card;
     });
@@ -111,7 +134,28 @@ const applyThorns = (card) => {
     return 0; // No thorns, return 0 damage
 };
 
-const handleBattleTurn = (playerCards, enemyCards) => {
+// Apply any damage from any source
+const applyDamage = (offender, defender, damage) => {
+    const newDamage = applyArmor(defender, damage);
+    if (newDamage === 0 || defender.ability?.["Shield"]) return;
+    defender.health -= newDamage;
+    checkCardHealth(defender);
+    // Apply Thorns damage to the attacker after damage is dealt
+    let thornsDamage = applyThorns(defender);
+    thornsDamage = applyArmor(offender, thornsDamage); // Armor the thorns damage
+    offender.health -= thornsDamage;
+    checkCardHealth(offender);
+};
+
+const checkCardHealth = (card) => {
+    card.health = Math.max(0, card.health);
+    if (card.health === 0 && card.ability?.["Endurance"]) {
+        card.health = 1;
+        delete card.ability["Endurance"];
+    }
+};
+
+export const handleBattleTurn = (playerCards, enemyCards) => {
     // Assumes playerCards and enemyCards are arrays of cards in each lane
     let updatedPlayerCards = [...playerCards];
     let updatedEnemyCards = [...enemyCards];
@@ -134,36 +178,15 @@ const handleBattleTurn = (playerCards, enemyCards) => {
         if (playerCard && enemyCard) {
             // Player attacks enemy card
             let incomingDamage = playerCard.attack;
-            incomingDamage = applyArmor(enemyCard, incomingDamage); // Apply Armor to enemy card
-            enemyCard.health -= incomingDamage;
+            applyDamage(playerCard, enemyCard, incomingDamage);
 
             // Enemy attacks player card
             let enemyDamage = enemyCard.attack;
-            enemyDamage = applyArmor(playerCard, enemyDamage); // Apply Armor to player card
-            playerCard.health -= enemyDamage;
+            applyDamage(enemyCard, playerCard, enemyDamage);
 
             // If a card's health goes below 0, it's considered "defeated"
-            if (enemyCard.health <= 0) {
-                enemyCard.health = 0; // Enemy card defeated
-            }
-            if (playerCard.health <= 0) {
-                playerCard.health = 0; // Player card defeated
-            }
-
-            // Apply Thorns damage to the attacker after damage is dealt
-            if (enemyDamage > 0) {
-                const thornsDamage = applyThorns(enemyCard);
-                if (thornsDamage > 0) {
-                    playerCard.health -= thornsDamage; // Thorns damage to player card
-                }
-            }
-
-            if (incomingDamage > 0) {
-                const thornsDamage = applyThorns(playerCard);
-                if (thornsDamage > 0) {
-                    enemyCard.health -= thornsDamage; // Thorns damage to enemy card
-                }
-            }
+            checkCardHealth(enemyCard);
+            checkCardHealth(playerCard);
         }
     }
 
