@@ -86,17 +86,21 @@ io.on("connection", (socket) => {
 
         const otherPlayerNumber = playerObj.playerNumber === 1 ? 2 : 1;
 
-        if (state[roomName][otherPlayerNumber].done) {
-            const { updatedPlayerCards, updatedEnemyCards } = handleBattleTurn(
-                state[roomName][1].board,
-                state[roomName][2].board
-            );
-            state[roomName][1].board = updatedPlayerCards;
-            state[roomName][2].board = updatedEnemyCards;
-            state[roomName][1].done = false;
-            state[roomName][2].done = false;
-            io.to(roomName).emit("do-turn", state[roomName]);
-        }
+        setTimeout(() => {
+            if (state[roomName][otherPlayerNumber].done) {
+                console.log(state[roomName]);
+                const { updatedPlayerCards, updatedEnemyCards } =
+                    handleBattleTurn(
+                        state[roomName][1].board,
+                        state[roomName][2].board
+                    );
+                state[roomName][1].board = updatedPlayerCards;
+                state[roomName][2].board = updatedEnemyCards;
+                state[roomName][1].done = false;
+                state[roomName][2].done = false;
+                io.to(roomName).emit("do-turn", state[roomName]);
+            }
+        }, 50);
     }
 });
 
