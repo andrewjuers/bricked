@@ -49,7 +49,7 @@ io.on("connection", (socket) => {
         socket.join(roomName);
         socket.number = 2;
         socket.emit("init", 2);
-        socket.emit("start-battle");
+        socket.to(roomName).emit("start-battle");
     }
 
     function handleNewGame(playerDeck) {
