@@ -78,6 +78,7 @@ io.on("connection", (socket) => {
     // MULTI-PLAYER BATTLE
     function handleEndTurn(playerObj) {
         const roomName = serverRooms[socket.id];
+        console.log(roomName);
         if (!roomName) return;
 
         state[roomName][playerObj.playerNumber].board = playerObj.board;
