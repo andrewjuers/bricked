@@ -46,7 +46,10 @@ io.on("connection", (socket) => {
 
         serverRooms[socket.id] = roomName;
 
-        state[roomName] = {...state[roomName], 2: {deck: playerDeck, board: [null, null, null]}}; 
+        state[roomName] = {
+            ...state[roomName],
+            2: { deck: playerDeck, board: [null, null, null] },
+        };
 
         socket.join(roomName);
         socket.number = 2;
@@ -62,7 +65,9 @@ io.on("connection", (socket) => {
         serverRooms[socket.id] = roomName;
         socket.emit("gameCode", roomName);
 
-        state[roomName] = {1: {deck: playerDeck, board: [null, null, null], done: false}}; // Placeholder for game state
+        state[roomName] = {
+            1: { deck: playerDeck, board: [null, null, null], done: false },
+        }; // Placeholder for game state
 
         socket.join(roomName);
         socket.number = 1;
@@ -77,17 +82,20 @@ io.on("connection", (socket) => {
         state[roomName][playerObj.playerNumber].board = playerObj.board;
         state[roomName][playerObj.playerNumber].done = true;
 
-        if (state[roomName][1].done && state[roomName][2].done) {
-            const { updatedPlayerCards, updatedEnemyCards } = handleBattleTurn(
-                state[roomName][1].board,
-                state[roomName][2].board
-            );
-            state[roomName][1].board = updatedPlayerCards;
-            state[roomName][2].board = updatedEnemyCards;
-            state[roomName][1].done = false;
-            state[roomName][2].done = false;
-            io.to(roomName).emit("do-turn", state[roomName]);
-        }
+        setTimeout(() => {
+            if (state[roomName][1].done && state[roomName][2].done) {
+                const { updatedPlayerCards, updatedEnemyCards } =
+                    handleBattleTurn(
+                        state[roomName][1].board,
+                        state[roomName][2].board
+                    );
+                state[roomName][1].board = updatedPlayerCards;
+                state[roomName][2].board = updatedEnemyCards;
+                state[roomName][1].done = false;
+                state[roomName][2].done = false;
+                io.to(roomName).emit("do-turn", state[roomName]);
+            }
+        }, 50); // 50ms should be enough, but you can tweak it
     }
 });
 
@@ -96,4 +104,3 @@ const PORT = process.env.PORT || 3001; // Never hardcode 3000 for Render
 server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
-
