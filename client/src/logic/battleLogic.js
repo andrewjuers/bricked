@@ -1,5 +1,3 @@
-// shared/battleLogic.js
-
 const handleCardAbilitiesBefore = (cards, opponentCards) => {
     return cards.map((card, i) => {
         if (!card) return card; // Skip empty slots
@@ -11,23 +9,14 @@ const handleCardAbilitiesBefore = (cards, opponentCards) => {
                     console.warn("Card missing health or maxHealth:", c);
                     return c; // Skip cards with missing health properties
                 }
-                const newHealth = Math.min(
-                    c.health + card.ability["Heal Team"] / 3,
-                    c.maxHealth
-                );
-                return {
-                    ...c,
-                    health: newHealth,
-                };
+                applyHeal(c, card.ability["Heal Team"] / 3);
+                return c;
             });
         }
 
         // Heal Self
         if (card.ability?.["Heal Self"]) {
-            card.health = Math.min(
-                card.health + card.ability["Heal Self"] / 2,
-                card.maxHealth
-            );
+            applyHeal(card, card.ability["Heal Self"] / 2);
         }
 
         // Attack Abilities
@@ -110,6 +99,9 @@ const handleCardAbilitiesAfter = (cards) => {
             delete card.ability["Shield"];
         }
 
+        // Check if each card has 0 health, also checking for the ability Endurance
+        checkCardHealth(card);
+
         return card;
     });
 };
@@ -132,17 +124,29 @@ const applyThorns = (card) => {
     return 0; // No thorns, return 0 damage
 };
 
+const applyLifeSteal = (offender, defender) => {
+    if (offender.ability?.["Life Steal"]) {
+        const healthGained = Math.min(
+            offender.ability["Life Steal"],
+            defender.health
+        );
+        applyHeal(offender, healthGained);
+    }
+};
+
+const applyHeal = (card, health) => {
+    card.health = Math.min(card.health + health, card.maxHealth);
+};
+
 // Apply any damage from any source
 const applyDamage = (offender, defender, damage) => {
     const newDamage = applyArmor(defender, damage);
     if (newDamage === 0 || defender.ability?.["Shield"]) return;
     defender.health -= newDamage;
-    checkCardHealth(defender);
     // Apply Thorns damage to the attacker after damage is dealt
     let thornsDamage = applyThorns(defender);
     thornsDamage = applyArmor(offender, thornsDamage); // Armor the thorns damage
     offender.health -= thornsDamage;
-    checkCardHealth(offender);
 };
 
 const checkCardHealth = (card) => {
@@ -176,15 +180,13 @@ export const handleBattleTurn = (playerCards, enemyCards) => {
         if (playerCard && enemyCard) {
             // Player attacks enemy card
             let incomingDamage = playerCard.attack;
+            applyLifeSteal(playerCard, enemyCard);
             applyDamage(playerCard, enemyCard, incomingDamage);
 
             // Enemy attacks player card
             let enemyDamage = enemyCard.attack;
+            applyLifeSteal(enemyCard, playerCard);
             applyDamage(enemyCard, playerCard, enemyDamage);
-
-            // If a card's health goes below 0, it's considered "defeated"
-            checkCardHealth(enemyCard);
-            checkCardHealth(playerCard);
         }
     }
 
