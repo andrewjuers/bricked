@@ -272,13 +272,13 @@ const MultiplayerBattle = ({ playerDeck, playerNumber, onGoHome }) => {
             <div>
                 <button
                     onClick={() => swapCards("slot1", "slot2")}
-                    disabled={gameOver}
+                    disabled={gameOver || isEndTurnDisabled}
                 >
                     Swap Slots 1 & 2
                 </button>
                 <button
                     onClick={() => swapCards("slot2", "slot3")}
-                    disabled={gameOver}
+                    disabled={gameOver || isEndTurnDisabled}
                 >
                     Swap Slots 2 & 3
                 </button>
@@ -303,7 +303,7 @@ const MultiplayerBattle = ({ playerDeck, playerNumber, onGoHome }) => {
                 >
                     End Turn
                 </button>
-                <button onClick={resetTurn} disabled={gameOver}>
+                <button onClick={resetTurn} disabled={gameOver || isEndTurnDisabled}>
                     Reset Turn
                 </button>
             </div>

@@ -82,8 +82,10 @@ io.on("connection", (socket) => {
         state[roomName][playerObj.playerNumber].board = playerObj.board;
         state[roomName][playerObj.playerNumber].done = true;
 
+        const otherPlayerNumber = (playerObj.playerNumber === 1) ? 2 : 1;
+
         setTimeout(() => {
-            if (state[roomName][1].done && state[roomName][2].done) {
+            if (state[roomName][otherPlayerNumber].done) {
                 const { updatedPlayerCards, updatedEnemyCards } =
                     handleBattleTurn(
                         state[roomName][1].board,
