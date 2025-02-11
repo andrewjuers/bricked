@@ -49,7 +49,10 @@ io.on("connection", (socket) => {
         socket.join(roomName);
         socket.number = 2;
         socket.emit("init", 2);
-        socket.to(roomName).emit("start-battle");
+        // **Delay emitting start signal to ensure the room is updated**
+        setTimeout(() => {
+            io.to(roomName).emit("start-battle");
+        }, 50); // 50ms should be enough, but you can tweak it
     }
 
     function handleNewGame(playerDeck) {
