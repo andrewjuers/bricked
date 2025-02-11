@@ -128,6 +128,12 @@ const MultiplayerBattle = ({ playerDeck, playerNumber, onGoHome }) => {
         }
     };
 
+    const clientTurn = (state) => {
+        if (state[1].done && state[2].done) {
+            socket.emit("server-turn");
+        }
+    } 
+
     const doTurn = (state) => {
         const [updatedPlayerCards, updatedEnemyCards] =
             playerNumber === 1
@@ -244,9 +250,11 @@ const MultiplayerBattle = ({ playerDeck, playerNumber, onGoHome }) => {
         }
 
         socket.on("do-turn", handleDoTurn);
+        socket.on("client-turn", clientTurn);
 
         return () => {
             socket.off("do-turn", doTurn);
+            socket.off("client-turn", clientTurn);
         };
     }, []);
 
