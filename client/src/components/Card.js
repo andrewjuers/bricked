@@ -58,14 +58,6 @@ const Card = ({ card }) => {
             {/* Main content */}
             <div className="card-body">
                 <div className="card-name">{name}</div>
-                <div style={{ textAlign: "center" }}>
-                    <img
-                        src={snailImage}
-                        alt="Snail"
-                        width={150}
-                        height={150}
-                    />
-                </div>
                 {abilities && <div className="card-abilities">{abilities}</div>}
             </div>
         </div>
