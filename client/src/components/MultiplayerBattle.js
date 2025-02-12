@@ -3,12 +3,15 @@ import BattleGrid from "./BattleGrid";
 import Card from "./Card";
 import "./Battle.css";
 import { io } from "socket.io-client";
+import { useGame } from "../context/GameContext";
 
 const socket = io("https://bricked.onrender.com", {
     transports: ["websocket"],
 });
 
-const MultiplayerBattle = ({ playerDeck, playerNumber, roomId, onGoHome }) => {
+const MultiplayerBattle = () => {
+    const { goHome: onGoHome, playerDeck, playerNumber, roomId } = useGame();
+
     const [hand, setHand] = useState([...playerDeck.level1]); // Player's current hand
     const [grid, setGrid] = useState({
         slot1: null,

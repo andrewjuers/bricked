@@ -1,3 +1,5 @@
+// Duplicate file because I'm lazy and can't find a better solution
+
 const handleCardAbilitiesBefore = (cards, opponentCards) => {
     return cards.map((card, i) => {
         if (!card) return card; // Skip empty slots
@@ -124,6 +126,7 @@ const applyThorns = (card) => {
     return 0; // No thorns, return 0 damage
 };
 
+// Apply Life Steal ability
 const applyLifeSteal = (offender, defender) => {
     if (offender.ability?.["Life Steal"]) {
         const healthGained = Math.min(
@@ -134,6 +137,7 @@ const applyLifeSteal = (offender, defender) => {
     }
 };
 
+// Apply any heal
 const applyHeal = (card, health) => {
     card.health = Math.min(card.health + health, card.maxHealth);
 };
@@ -149,6 +153,7 @@ const applyDamage = (offender, defender, damage) => {
     offender.health -= thornsDamage;
 };
 
+// Check health <= 0
 const checkCardHealth = (card) => {
     card.health = Math.max(0, card.health);
     if (card.health === 0 && card.ability?.["Endurance"]) {
@@ -157,7 +162,7 @@ const checkCardHealth = (card) => {
     }
 };
 
-export const handleBattleTurn = (playerCards, enemyCards) => {
+const handleBattleTurn = (playerCards, enemyCards) => {
     // Assumes playerCards and enemyCards are arrays of cards in each lane
     let updatedPlayerCards = [...playerCards];
     let updatedEnemyCards = [...enemyCards];
@@ -199,3 +204,5 @@ export const handleBattleTurn = (playerCards, enemyCards) => {
         updatedEnemyCards,
     };
 };
+
+export { handleBattleTurn };

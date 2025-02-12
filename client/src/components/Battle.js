@@ -3,8 +3,11 @@ import BattleGrid from "./BattleGrid";
 import Card from "./Card";
 import "./Battle.css";
 import { handleBattleTurn } from "../logic/battleLogic";
+import { useGame } from "../context/GameContext";
 
-const Battle = ({ playerDeck, opponentDeck, onGoHome }) => {
+const Battle = () => {
+    const { playerDeck, opponentDeck, goHome: onGoHome } = useGame();
+
     const [hand, setHand] = useState([...playerDeck.level1]); // Player's current hand
     const [grid, setGrid] = useState({
         slot1: null,

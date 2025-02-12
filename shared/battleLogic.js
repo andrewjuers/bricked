@@ -1,7 +1,5 @@
 // Duplicate file because I'm lazy and can't find a better solution
 
-// shared/battleLogic.js
-
 const handleCardAbilitiesBefore = (cards, opponentCards) => {
     return cards.map((card, i) => {
         if (!card) return card; // Skip empty slots

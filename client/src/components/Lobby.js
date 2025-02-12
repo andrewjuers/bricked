@@ -1,18 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { io } from "socket.io-client";
+import { useGame } from "../context/GameContext";
 
 const socket = io("https://bricked.onrender.com", {
     transports: ["websocket"],
 });
 
-const Lobby = ({
-    onGoHome,
-    startMultiBattle,
-    playerDeck,
-    setPlayerNumber,
-    roomId,
-    setRoomId,
-}) => {
+const Lobby = () => {
+    const {
+        goHome: onGoHome,
+        startMultiBattle,
+        playerDeck,
+        setPlayerNumber,
+        roomId,
+        setRoomId,
+    } = useGame();
+
     const [joinCode, setJoinCode] = useState("");
 
     useEffect(() => {

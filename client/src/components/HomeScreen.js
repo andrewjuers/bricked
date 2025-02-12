@@ -1,15 +1,17 @@
-import React, { useState } from "react";
+import React from "react";
 import Card from "./Card";
 import cardsData from "../data/cards.json"; // Import JSON data
 import "./HomeScreen.css";
 import Chatbox from "./ChatBox";
+import { useGame } from "../context/GameContext";
 
-function HomeScreen({ onSelectionComplete, goLobby }) {
-    const [selectedCards, setSelectedCards] = useState({
-        level1: [],
-        level2: [],
-        level3: [],
-    });
+function HomeScreen() {
+    const {
+        playerDeck: selectedCards,
+        setPlayerDeck: setSelectedCards,
+        handleSelectionComplete: onSelectionComplete,
+        goLobby,
+    } = useGame();
 
     const handleCardClick = (card, level) => {
         setSelectedCards((prev) => {

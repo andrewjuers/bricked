@@ -2,7 +2,7 @@ import React from "react";
 import Card from "./Card"; // Import the Card component
 import "./BattleGrid.css";
 
-const BattleGrid = ({ grid, onCardDrop, turn }) => {
+const BattleGrid = ({ grid, onCardDrop }) => {
     const handleDrop = (slot, event) => {
         event.preventDefault();
         const cardData = event.dataTransfer.getData("card");
