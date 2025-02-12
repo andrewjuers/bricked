@@ -137,6 +137,18 @@ const applyLifeSteal = (offender, defender) => {
     }
 };
 
+// Apply Recoil
+const applyRecoil = (offender, defender) => {
+    if (offender.ability?.["Recoil"]) {
+        const recoilDamage = Math.min(
+            offender.ability["Recoil"] / 2,
+            defender.health
+        );
+        // Deal damage directly
+        offender.health -= recoilDamage;
+    }
+};
+
 // Apply any heal
 const applyHeal = (card, health) => {
     card.health = Math.min(card.health + health, card.maxHealth);
@@ -186,11 +198,13 @@ const handleBattleTurn = (playerCards, enemyCards) => {
             // Player attacks enemy card
             let incomingDamage = playerCard.attack;
             applyLifeSteal(playerCard, enemyCard);
+            applyRecoil(playerCard, enemyCard);
             applyDamage(playerCard, enemyCard, incomingDamage);
 
             // Enemy attacks player card
             let enemyDamage = enemyCard.attack;
             applyLifeSteal(enemyCard, playerCard);
+            applyRecoil(enemyCard, playerCard);
             applyDamage(enemyCard, playerCard, enemyDamage);
         }
     }

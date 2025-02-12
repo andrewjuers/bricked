@@ -126,6 +126,7 @@ const applyThorns = (card) => {
     return 0; // No thorns, return 0 damage
 };
 
+// Apply Life Steal ability
 const applyLifeSteal = (offender, defender) => {
     if (offender.ability?.["Life Steal"]) {
         const healthGained = Math.min(
@@ -136,6 +137,19 @@ const applyLifeSteal = (offender, defender) => {
     }
 };
 
+// Apply Recoil
+const applyRecoil = (offender, defender) => {
+    if (offender.ability?.["Recoil"]) {
+        const recoilDamage = Math.min(
+            offender.ability["Recoil"] / 2,
+            defender.health
+        );
+        // Deal damage directly
+        offender.health -= recoilDamage;
+    }
+};
+
+// Apply any heal
 const applyHeal = (card, health) => {
     card.health = Math.min(card.health + health, card.maxHealth);
 };
@@ -151,6 +165,7 @@ const applyDamage = (offender, defender, damage) => {
     offender.health -= thornsDamage;
 };
 
+// Check health <= 0
 const checkCardHealth = (card) => {
     card.health = Math.max(0, card.health);
     if (card.health === 0 && card.ability?.["Endurance"]) {
@@ -183,11 +198,13 @@ const handleBattleTurn = (playerCards, enemyCards) => {
             // Player attacks enemy card
             let incomingDamage = playerCard.attack;
             applyLifeSteal(playerCard, enemyCard);
+            applyRecoil(playerCard, enemyCard);
             applyDamage(playerCard, enemyCard, incomingDamage);
 
             // Enemy attacks player card
             let enemyDamage = enemyCard.attack;
             applyLifeSteal(enemyCard, playerCard);
+            applyRecoil(enemyCard, playerCard);
             applyDamage(enemyCard, playerCard, enemyDamage);
         }
     }
@@ -202,6 +219,4 @@ const handleBattleTurn = (playerCards, enemyCards) => {
     };
 };
 
-module.exports = {
-    handleBattleTurn,
-};
+module.exports = { handleBattleTurn };
