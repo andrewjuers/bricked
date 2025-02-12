@@ -161,7 +161,7 @@ const checkCardHealth = (card) => {
     }
 };
 
-export const handleBattleTurn = (playerCards, enemyCards) => {
+const handleBattleTurn = (playerCards, enemyCards) => {
     // Assumes playerCards and enemyCards are arrays of cards in each lane
     let updatedPlayerCards = [...playerCards];
     let updatedEnemyCards = [...enemyCards];
