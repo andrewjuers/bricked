@@ -1,7 +1,6 @@
 import React from "react";
 import "./Card.css";
 import cards from "../data/cards.json";
-import snailImage from "../data/snail.png";
 
 // Utility function to calculate max health
 const calculateMaxHealth = (idOrIds) => {
@@ -23,13 +22,6 @@ const calculateMaxHealth = (idOrIds) => {
     }
 
     return totalMaxHealth;
-};
-
-const checkForCardId = (idOrIds, cards) => {
-    const ids = Array.isArray(idOrIds) ? idOrIds : [idOrIds];
-
-    // Check if any card contains the given id(s)
-    return ids.some((id) => cards.some((card) => card.id === id));
 };
 
 const Card = ({ card }) => {

@@ -188,9 +188,9 @@
             "id": 21,
             "name": "Thunderbird",
             "level": 3,
-            "health": 10,
-            "maxHealth": 10,
-            "attack": 10,
+            "health": 12,
+            "maxHealth": 12,
+            "attack": 12,
             "ability": {"Double Attack": 10}
         },
         {
@@ -200,16 +200,16 @@
             "health": 17,
             "maxHealth": 17,
             "attack": 5,
-            "ability": {"Rivalry (Health)": 8}
+            "ability": {"Rivalry (Health)": 10}
         },
         {
             "id": 23,
             "name": "Rhino",
             "level": 3,
-            "health": 17,
-            "maxHealth": 17,
+            "health": 15,
+            "maxHealth": 15,
             "attack": 5,
-            "ability": {"Immunity": 7}
+            "ability": {"Immunity": 10}
         },
         {
             "id": 24,
