@@ -19,12 +19,23 @@ const io = new Server(server, {
 
 const state = {};
 const serverRooms = {};
+let messages = []; // An array to store chat messages temporarily
 
 io.on("connection", (socket) => {
     console.log(`User Connected: ${socket.id}`);
 
+    // Send all previous messages to the newly connected client
+    socket.emit("send_messages", messages);
+
     socket.on("send_message", (data) => {
+        // Save the message to the messages array (or database)
+        messages.push(data);
         io.emit("receive_message", data); // Broadcast message to all users
+    });
+
+    // Listen for a request to fetch the previous messages
+    socket.on("get_messages", () => {
+        socket.emit("send_messages", messages);
     });
 
     socket.on("newGame", handleNewGame);
