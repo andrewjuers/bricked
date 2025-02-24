@@ -43,7 +43,8 @@ const Card = ({ card }) => {
             {/* Top section with health and attack */}
             <div className="card-top">
                 <div className="card-health">
-                    {health}/{calculateMaxHealth(id)}
+                    {health}
+                    {id !== -1 ? `/${calculateMaxHealth(id)}` : `/${health}`}
                 </div>
                 <div className="card-attack">{attack}</div>
             </div>

@@ -9,6 +9,7 @@ export function GameProvider({ children }) {
         level1: [],
         level2: [],
         level3: [],
+        level4: [],
     });
     const [opponentDeck, setOpponentDeck] = useState(null);
     const [playerNumber, setPlayerNumber] = useState(null);
@@ -21,6 +22,7 @@ export function GameProvider({ children }) {
     };
 
     const goHome = () => setCurrentScreen("home");
+    const goCreateCard = () => setCurrentScreen("create-card");
     const goLobby = (selectedCards) => {
         setPlayerDeck(selectedCards);
         setCurrentScreen("lobby");
@@ -43,6 +45,7 @@ export function GameProvider({ children }) {
                 goHome,
                 goLobby,
                 startMultiBattle,
+                goCreateCard,
             }}
         >
             {children}

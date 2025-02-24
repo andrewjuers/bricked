@@ -126,6 +126,8 @@ const MultiplayerBattle = () => {
                 setHand([...playerDeck.level2]);
             } else if (newTurn === 3) {
                 setHand([...playerDeck.level3]);
+            } else if (newTurn === 4) {
+                setHand([...playerDeck.level4]); // Add logic for level 4 cards
             }
             return newTurn;
         });

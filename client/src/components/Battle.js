@@ -25,18 +25,16 @@ const Battle = () => {
     const [gameOver, setGameOver] = useState(false);
     const [gameResult, setGameResult] = useState(""); // "Victory" or "Defeat"
 
-    // To store the initial state of grid and hand
     const [initialGrid, setInitialGrid] = useState({});
     const [initialHand, setInitialHand] = useState([]);
 
     const normalizeAbilities = (abilities) => {
         if (!abilities || typeof abilities !== "object") {
-            return {}; // Return an empty object if no abilities
+            return {}; 
         }
-        return abilities; // Already normalized as an object
+        return abilities; 
     };
 
-    // Function to combine two cards
     const combineCards = (existingCard, newCard) => {
         return {
             id: [
@@ -44,10 +42,10 @@ const Battle = () => {
                     ? existingCard.id
                     : [existingCard.id]),
                 newCard.id,
-            ], // Combine IDs
-            name: `${existingCard.name} + ${newCard.name}`, // Combine names
-            health: Number(existingCard.health) + Number(newCard.health), // Add health
-            attack: existingCard.attack + newCard.attack, // Add attack
+            ], 
+            name: `${existingCard.name} + ${newCard.name}`, 
+            health: Number(existingCard.health) + Number(newCard.health),
+            attack: existingCard.attack + newCard.attack,
             ability: Object.entries({
                 ...normalizeAbilities(existingCard.ability),
                 ...normalizeAbilities(newCard.ability),
@@ -56,14 +54,13 @@ const Battle = () => {
                     (existingCard.ability[key] || 0) +
                     (newCard.ability[key] || 0);
                 return acc;
-            }, {}), // Merge abilities, adding values for duplicate abilities
-            level: Math.max(existingCard.level, newCard.level), // Max level
+            }, {}),
+            level: Math.max(existingCard.level, newCard.level), 
             maxHealth: existingCard.maxHealth + newCard.maxHealth,
         };
     };
 
     const handleCardDrop = (slot, card) => {
-        // Check if the card is already in a slot
         const isCardAlreadyInSlot = Object.values(grid).some(
             (existingCard) =>
                 existingCard &&
@@ -91,7 +88,6 @@ const Battle = () => {
             const existingCard = grid[slot];
 
             if (existingCard.level !== card.level) {
-                // Combine cards using the reusable combineCards function
                 const combinedCard = combineCards(existingCard, card);
 
                 setGrid((prevGrid) => ({
@@ -108,25 +104,18 @@ const Battle = () => {
     };
 
     const handleEndTurn = () => {
-        // Combine opponent's cards with existing cards in their slots
         setGrid((prevGrid) => {
             let newGrid = { ...prevGrid };
-            // Sanity check
+
             if (opponentCards.length > 0) {
-                // Combine cards in opponent's slots if they already exist
                 for (let i = 0; i < 3; i++) {
-                    const slot = `slot${4 + i}`; // slot4, slot5, slot6
+                    const slot = `slot${4 + i}`;
                     const opponentCard = opponentCards[i];
                     const existingCard = newGrid[slot];
 
                     if (existingCard) {
-                        // If there's an existing card in the slot, combine it with the new opponent card
-                        newGrid[slot] = combineCards(
-                            existingCard,
-                            opponentCard
-                        );
+                        newGrid[slot] = combineCards(existingCard, opponentCard);
                     } else {
-                        // If no card exists, just add the new opponent card
                         newGrid[slot] = opponentCard;
                     }
                 }
@@ -136,15 +125,15 @@ const Battle = () => {
 
         setTurn(turn + 1);
 
-        // Update for the next turn
         setOpponentCards([]);
         if (currentLevel === 1 && opponentDeck.level2) {
             setOpponentCards([...opponentDeck.level2]);
         } else if (currentLevel === 2 && opponentDeck.level3) {
             setOpponentCards([...opponentDeck.level3]);
+        } else if (currentLevel === 3 && opponentDeck.level4) {
+            setOpponentCards([...opponentDeck.level4]);
         }
 
-        // Load the next level of cards if the hand is empty
         if (hand.length === 0) {
             if (currentLevel === 1 && playerDeck.level2) {
                 setHand([...playerDeck.level2]);
@@ -152,6 +141,9 @@ const Battle = () => {
             } else if (currentLevel === 2 && playerDeck.level3) {
                 setHand([...playerDeck.level3]);
                 setCurrentLevel(3);
+            } else if (currentLevel === 3 && playerDeck.level4) {
+                setHand([...playerDeck.level4]);
+                setCurrentLevel(4);
             }
         }
     };
@@ -162,7 +154,6 @@ const Battle = () => {
             [grid.slot4, grid.slot5, grid.slot6]
         );
 
-        // Update the grid slots with the new card states
         setGrid({
             slot1:
                 updatedPlayerCards[0] && updatedPlayerCards[0].health > 0
@@ -190,7 +181,7 @@ const Battle = () => {
                     : null,
         });
         if (turn <= 2) return;
-        // Check end condition
+
         const playerSlotsEmpty = updatedPlayerCards.every(
             (card) => card === null || card.health === 0
         );
@@ -206,7 +197,6 @@ const Battle = () => {
     };
 
     const resetTurn = () => {
-        // On turn 1, reset the grid to null slots
         if (turn === 1) {
             setGrid({
                 slot1: null,
@@ -217,10 +207,8 @@ const Battle = () => {
                 slot6: null,
             });
         } else {
-            // On turn 2 and beyond, reset to the initial state of the grid
             setGrid((prevGrid) => {
-                let newGrid = { ...initialGrid }; // Start with the initial grid
-                // Loop through each slot and nullify dead cards
+                let newGrid = { ...initialGrid };
                 Object.keys(newGrid).forEach((slot) => {
                     if (prevGrid[slot]?.health <= 0) {
                         newGrid[slot] = null;
@@ -230,15 +218,13 @@ const Battle = () => {
                 return newGrid;
             });
         }
-        // Reset the hand to the original hand for this turn
+
         setHand(initialHand);
     };
 
     const startTurn = () => {
-        // Save the initial state of grid and hand at the start of the turn
         setInitialGrid(() => {
-            let newGrid = { ...grid }; // Start with the initial grid
-            // Loop through each slot and nullify dead cards
+            let newGrid = { ...grid };
             Object.keys(grid).forEach((slot) => {
                 if (grid[slot]?.health === 0) {
                     newGrid[slot] = null;
@@ -275,49 +261,24 @@ const Battle = () => {
             )}
             <button onClick={onGoHome}>Back to Home</button>
             <h2>Turn {turn}</h2>
-            {/* Combined Player and Opponent Grid */}
             <BattleGrid grid={grid} onCardDrop={handleCardDrop} turn={turn} />
-
-            {/* Swap Position Buttons */}
             <div>
-                <button
-                    onClick={() => swapCards("slot1", "slot2")}
-                    disabled={gameOver}
-                >
-                    Swap Slots 1 & 2
-                </button>
-                <button
-                    onClick={() => swapCards("slot2", "slot3")}
-                    disabled={gameOver}
-                >
-                    Swap Slots 2 & 3
-                </button>
+                <button onClick={() => swapCards("slot1", "slot2")}>Swap Slots 1 & 2</button>
+                <button onClick={() => swapCards("slot2", "slot3")}>Swap Slots 2 & 3</button>
             </div>
-
-            {/* Render Player's Cards Below the Grid */}
             <div className="player-cards">
                 {hand.map((card) => (
                     <Card key={card.id} card={card} />
                 ))}
             </div>
-
-            {/* Action Buttons */}
             <div className="action-buttons">
                 <button
                     onClick={handleEndTurn}
-                    disabled={
-                        (Object.values(grid)
-                            .slice(0, 3)
-                            .some((slot) => slot === null) &&
-                            hand.length > 0) ||
-                        gameOver
-                    }
+                    disabled={Object.values(grid).slice(0, 3).some((slot) => slot === null) && hand.length > 0 || gameOver}
                 >
                     End Turn
                 </button>
-                <button onClick={resetTurn} disabled={gameOver}>
-                    Reset Turn
-                </button>
+                <button onClick={resetTurn} disabled={gameOver}>Reset Turn</button>
             </div>
         </div>
     );

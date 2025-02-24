@@ -11,6 +11,7 @@ function HomeScreen() {
         setPlayerDeck: setSelectedCards,
         handleSelectionComplete: onSelectionComplete,
         goLobby,
+        goCreateCard,
     } = useGame();
 
     const handleCardClick = (card, level) => {
@@ -36,10 +37,12 @@ function HomeScreen() {
     };
 
     const handleNext = () => {
+        // Check if all levels (1, 2, 3, and 4) have 3 selected cards
         if (
             selectedCards.level1.length === 3 &&
             selectedCards.level2.length === 3 &&
-            selectedCards.level3.length === 3
+            selectedCards.level3.length === 3 &&
+            selectedCards.level4.length === 3 // Check for level4
         ) {
             const freshSelectedCards = JSON.parse(
                 JSON.stringify(selectedCards)
@@ -50,18 +53,46 @@ function HomeScreen() {
         }
     };
 
+    // Function to select 3 random cards from each level
+    const selectRandomTeam = () => {
+        const randomSelection = {};
+
+        ["level1", "level2", "level3", "level4"].forEach((level) => {
+            const randomCards = [];
+            const availableCards = cardsData[level];
+
+            // Randomly shuffle the cards
+            while (randomCards.length < 3) {
+                const randomIndex = Math.floor(Math.random() * availableCards.length);
+                const card = availableCards[randomIndex];
+                if (!randomCards.some((c) => c.id === card.id)) {
+                    randomCards.push(card);
+                }
+            }
+
+            randomSelection[level] = randomCards;
+        });
+
+        // Update selectedCards with the random selection
+        setSelectedCards(randomSelection);
+    };
+
     return (
         <div className="HomeScreen">
             <Chatbox />
-            {["level1", "level2", "level3"].map((level) => (
+            <button onClick={() => goCreateCard()}>Create Card</button>
+            {/* Button to select random team */}
+            <button onClick={selectRandomTeam}>Select Random Team</button>
+            {/* Include level4 in the mapping */}
+            {["level1", "level2", "level3", "level4"].map((level) => (
                 <div key={level}>
                     <h2>Select 3 Cards from {level.toUpperCase()}</h2>
                     <div className="card-grid">
                         {cardsData[level].map((card) => {
                             const cardWithHealth = {
                                 ...card,
-                                health: card.maxHealth,
-                            }; // Ensure health is set to maxHealth
+                                health: card.maxHealth, // Ensure health is set to maxHealth
+                            };
 
                             return (
                                 <div
@@ -91,7 +122,8 @@ function HomeScreen() {
                     !(
                         selectedCards.level1.length === 3 &&
                         selectedCards.level2.length === 3 &&
-                        selectedCards.level3.length === 3
+                        selectedCards.level3.length === 3 &&
+                        selectedCards.level4.length === 3 // Check for level4
                     )
                 }
             >
