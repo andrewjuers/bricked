@@ -15,6 +15,9 @@ export function GameProvider({ children }) {
     const [playerNumber, setPlayerNumber] = useState(null);
     const [roomId, setRoomId] = useState("NOT IN GAME");
 
+    // New state for battle log
+    const [battleLog, setBattleLog] = useState({});
+
     const handleSelectionComplete = (selectedCards) => {
         setPlayerDeck(selectedCards);
         setOpponentDeck(generateOpponentDeck());
@@ -46,6 +49,8 @@ export function GameProvider({ children }) {
                 goLobby,
                 startMultiBattle,
                 goCreateCard,
+                battleLog,
+                setBattleLog
             }}
         >
             {children}

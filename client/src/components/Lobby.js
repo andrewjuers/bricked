@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { io } from "socket.io-client";
 import { useGame } from "../context/GameContext";
+import Chatbox from "./ChatBox";
+import "./Lobby.css";
 
 const socket = io("https://bricked.onrender.com", {
     transports: ["websocket"],
@@ -54,19 +56,24 @@ const Lobby = () => {
     };
 
     return (
-        <div>
-            <button onClick={onGoHome}>Back to Home</button>
-            <h1>Game Code: {roomId}</h1>
-            <button onClick={newGame}>New Game</button>
+        <div className="lobby-container">
+            <div className="lobby-chat">
+                <Chatbox />
+            </div>
+            <div className="lobby-area">
+                <button onClick={onGoHome}>Back to Home</button>
+                <h1>Game Code: {roomId}</h1>
+                <button onClick={newGame}>New Game</button>
 
-            <div>
-                <input
-                    type="text"
-                    placeholder="Enter game code"
-                    value={joinCode}
-                    onChange={(e) => setJoinCode(e.target.value)}
-                />
-                <button onClick={joinGame}>Join Game</button>
+                <div>
+                    <input
+                        type="text"
+                        placeholder="Enter game code"
+                        value={joinCode}
+                        onChange={(e) => setJoinCode(e.target.value)}
+                    />
+                    <button onClick={joinGame}>Join Game</button>
+                </div>
             </div>
         </div>
     );

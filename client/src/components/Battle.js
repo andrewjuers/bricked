@@ -4,9 +4,14 @@ import Card from "./Card";
 import "./Battle.css";
 import { handleBattleTurn } from "../logic/battleLogic";
 import { useGame } from "../context/GameContext";
+import Chatbox from "./ChatBox";
 
 const Battle = () => {
-    const { playerDeck, opponentDeck, goHome: onGoHome } = useGame();
+    const {
+        playerDeck,
+        opponentDeck,
+        goHome: onGoHome,
+    } = useGame();
 
     const [hand, setHand] = useState([...playerDeck.level1]); // Player's current hand
     const [grid, setGrid] = useState({
@@ -30,9 +35,9 @@ const Battle = () => {
 
     const normalizeAbilities = (abilities) => {
         if (!abilities || typeof abilities !== "object") {
-            return {}; 
+            return {};
         }
-        return abilities; 
+        return abilities;
     };
 
     const combineCards = (existingCard, newCard) => {
@@ -42,8 +47,8 @@ const Battle = () => {
                     ? existingCard.id
                     : [existingCard.id]),
                 newCard.id,
-            ], 
-            name: `${existingCard.name} + ${newCard.name}`, 
+            ],
+            name: `${existingCard.name} + ${newCard.name}`,
             health: Number(existingCard.health) + Number(newCard.health),
             attack: existingCard.attack + newCard.attack,
             ability: Object.entries({
@@ -55,7 +60,7 @@ const Battle = () => {
                     (newCard.ability[key] || 0);
                 return acc;
             }, {}),
-            level: Math.max(existingCard.level, newCard.level), 
+            level: Math.max(existingCard.level, newCard.level),
             maxHealth: existingCard.maxHealth + newCard.maxHealth,
         };
     };
@@ -114,7 +119,10 @@ const Battle = () => {
                     const existingCard = newGrid[slot];
 
                     if (existingCard) {
-                        newGrid[slot] = combineCards(existingCard, opponentCard);
+                        newGrid[slot] = combineCards(
+                            existingCard,
+                            opponentCard
+                        );
                     } else {
                         newGrid[slot] = opponentCard;
                     }
@@ -252,33 +260,54 @@ const Battle = () => {
     }, [turn]);
 
     return (
-        <div>
-            {gameOver && (
+        <div className="battle-container">
+            <div className="battle-chat">
+                <Chatbox />
+            </div>
+            <div className="battle-area">
+                {gameOver && (
+                    <div>
+                        <h1>Game Over</h1>
+                        <h2>{gameResult}</h2>
+                    </div>
+                )}
+                <button onClick={onGoHome}>Back to Home</button>
+                <h2>Turn {turn}</h2>
+                <BattleGrid
+                    grid={grid}
+                    onCardDrop={handleCardDrop}
+                    turn={turn}
+                />
                 <div>
-                    <h1>Game Over</h1>
-                    <h2>{gameResult}</h2>
+                    <button onClick={() => swapCards("slot1", "slot2")}>
+                        Swap Slots 1 & 2
+                    </button>
+                    <button onClick={() => swapCards("slot2", "slot3")}>
+                        Swap Slots 2 & 3
+                    </button>
                 </div>
-            )}
-            <button onClick={onGoHome}>Back to Home</button>
-            <h2>Turn {turn}</h2>
-            <BattleGrid grid={grid} onCardDrop={handleCardDrop} turn={turn} />
-            <div>
-                <button onClick={() => swapCards("slot1", "slot2")}>Swap Slots 1 & 2</button>
-                <button onClick={() => swapCards("slot2", "slot3")}>Swap Slots 2 & 3</button>
-            </div>
-            <div className="player-cards">
-                {hand.map((card) => (
-                    <Card key={card.id} card={card} />
-                ))}
-            </div>
-            <div className="action-buttons">
-                <button
-                    onClick={handleEndTurn}
-                    disabled={Object.values(grid).slice(0, 3).some((slot) => slot === null) && hand.length > 0 || gameOver}
-                >
-                    End Turn
-                </button>
-                <button onClick={resetTurn} disabled={gameOver}>Reset Turn</button>
+                <div className="player-cards">
+                    {hand.map((card) => (
+                        <Card key={card.id} card={card} />
+                    ))}
+                </div>
+                <div className="action-buttons">
+                    <button
+                        onClick={handleEndTurn}
+                        disabled={
+                            (Object.values(grid)
+                                .slice(0, 3)
+                                .some((slot) => slot === null) &&
+                                hand.length > 0) ||
+                            gameOver
+                        }
+                    >
+                        End Turn
+                    </button>
+                    <button onClick={resetTurn} disabled={gameOver}>
+                        Reset Turn
+                    </button>
+                </div>
             </div>
         </div>
     );

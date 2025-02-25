@@ -9,18 +9,30 @@ const Chatbox = () => {
     const [message, setMessage] = useState("");
     const [messages, setMessages] = useState([]);
 
+    // Fetch previous messages when component mounts
     useEffect(() => {
         socket.on("receive_message", (data) => {
             setMessages((prevMessages) => [...prevMessages, data]);
         });
 
-        return () => socket.off("receive_message");
+        // Fetch existing messages from the server
+        socket.emit("get_messages"); // Emit a request to get previous messages
+
+        // When the server sends the historical messages
+        socket.on("send_messages", (data) => {
+            setMessages(data); // Store the previous messages
+        });
+
+        return () => {
+            socket.off("receive_message");
+            socket.off("send_messages");
+        };
     }, []);
 
     const sendMessage = () => {
         if (message.trim() !== "") {
             socket.emit("send_message", message);
-            setMessage("");
+            setMessage(""); // Clear the input field after sending
         }
     };
 

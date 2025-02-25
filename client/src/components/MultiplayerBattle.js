@@ -4,6 +4,7 @@ import Card from "./Card";
 import "./Battle.css";
 import { io } from "socket.io-client";
 import { useGame } from "../context/GameContext";
+import Chatbox from "./ChatBox";
 
 const socket = io("https://bricked.onrender.com", {
     transports: ["websocket"],
@@ -261,62 +262,71 @@ const MultiplayerBattle = () => {
     };
 
     return (
-        <div>
-            {gameOver && (
+        <div className="battle-container">
+            <div className="battle-chat">
+                <Chatbox />
+            </div>
+            <div className="battle-area">
+                {gameOver && (
+                    <div>
+                        <h1>Game Over</h1>
+                        <h2>{gameResult}</h2>
+                    </div>
+                )}
+                <button onClick={onGoHome}>Back to Home</button>
+                <h2>Turn {turn}</h2>
+                {/* Combined Player and Opponent Grid */}
+                <BattleGrid
+                    grid={grid}
+                    onCardDrop={handleCardDrop}
+                    turn={turn}
+                />
+
+                {/* Swap Position Buttons */}
                 <div>
-                    <h1>Game Over</h1>
-                    <h2>{gameResult}</h2>
+                    <button
+                        onClick={() => swapCards("slot1", "slot2")}
+                        disabled={gameOver || isEndTurnDisabled}
+                    >
+                        Swap Slots 1 & 2
+                    </button>
+                    <button
+                        onClick={() => swapCards("slot2", "slot3")}
+                        disabled={gameOver || isEndTurnDisabled}
+                    >
+                        Swap Slots 2 & 3
+                    </button>
                 </div>
-            )}
-            <button onClick={onGoHome}>Back to Home</button>
-            <h2>Turn {turn}</h2>
-            {/* Combined Player and Opponent Grid */}
-            <BattleGrid grid={grid} onCardDrop={handleCardDrop} turn={turn} />
 
-            {/* Swap Position Buttons */}
-            <div>
-                <button
-                    onClick={() => swapCards("slot1", "slot2")}
-                    disabled={gameOver || isEndTurnDisabled}
-                >
-                    Swap Slots 1 & 2
-                </button>
-                <button
-                    onClick={() => swapCards("slot2", "slot3")}
-                    disabled={gameOver || isEndTurnDisabled}
-                >
-                    Swap Slots 2 & 3
-                </button>
-            </div>
+                {/* Render Player's Cards Below the Grid */}
+                <div className="player-cards">
+                    {hand.map((card) => (
+                        <Card key={card.id} card={card} />
+                    ))}
+                </div>
 
-            {/* Render Player's Cards Below the Grid */}
-            <div className="player-cards">
-                {hand.map((card) => (
-                    <Card key={card.id} card={card} />
-                ))}
-            </div>
-
-            {/* Action Buttons */}
-            <div className="action-buttons">
-                <button
-                    onClick={handleEndTurnButtonClick}
-                    disabled={
-                        isEndTurnDisabled ||
-                        (Object.values(grid)
-                            .slice(0, 3)
-                            .some((slot) => slot === null) &&
-                            hand.length > 0) ||
-                        gameOver
-                    }
-                >
-                    End Turn
-                </button>
-                <button
-                    onClick={resetTurn}
-                    disabled={gameOver || isEndTurnDisabled}
-                >
-                    Reset Turn
-                </button>
+                {/* Action Buttons */}
+                <div className="action-buttons">
+                    <button
+                        onClick={handleEndTurnButtonClick}
+                        disabled={
+                            isEndTurnDisabled ||
+                            (Object.values(grid)
+                                .slice(0, 3)
+                                .some((slot) => slot === null) &&
+                                hand.length > 0) ||
+                            gameOver
+                        }
+                    >
+                        End Turn
+                    </button>
+                    <button
+                        onClick={resetTurn}
+                        disabled={gameOver || isEndTurnDisabled}
+                    >
+                        Reset Turn
+                    </button>
+                </div>
             </div>
         </div>
     );
