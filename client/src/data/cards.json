@@ -303,11 +303,11 @@
             "id": 32,
             "name": "Thunderbird",
             "level": 4,
-            "health": 20,
-            "maxHealth": 20,
-            "attack": 0,
+            "health": 23,
+            "maxHealth": 23,
+            "attack": 12,
             "ability": {
-                "Double Attack": 20
+                "Double Basic": 5
             }
         }
     ]

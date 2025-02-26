@@ -38,31 +38,43 @@ const MultiplayerBattle = () => {
         return abilities; // Already normalized as an object
     };
 
-    // Function to combine two cards
     const combineCards = (existingCard, newCard) => {
+        // Normalize abilities to ensure they are objects
+        const existingAbilities = normalizeAbilities(existingCard.ability);
+        const newAbilities = normalizeAbilities(newCard.ability);
+    
+        // Merge abilities by adding values together
+        let combinedAbilities = Object.entries({
+            ...existingAbilities,
+            ...newAbilities,
+        }).reduce((acc, [key, value]) => {
+            acc[key] = (existingAbilities[key] || 0) + (newAbilities[key] || 0);
+            return acc;
+        }, {});
+    
+        // Check if either card has "Double Basic" and apply effect
+        const hasDoubleBasic = existingCard.id === 32 || newCard.id === 32;
+        if (hasDoubleBasic) {
+            const abilityKeys = Object.keys(combinedAbilities);
+            if (abilityKeys.length > 0) {
+                const firstAbility = abilityKeys[0]; // Get the first ability key
+                combinedAbilities[firstAbility] *= 2; // Double its value
+            }
+        }
+    
         return {
             id: [
-                ...(Array.isArray(existingCard.id)
-                    ? existingCard.id
-                    : [existingCard.id]),
+                ...(Array.isArray(existingCard.id) ? existingCard.id : [existingCard.id]),
                 newCard.id,
-            ], // Combine IDs
-            name: `${existingCard.name} + ${newCard.name}`, // Combine names
-            health: Number(existingCard.health) + Number(newCard.health), // Add health
-            attack: existingCard.attack + newCard.attack, // Add attack
-            ability: Object.entries({
-                ...normalizeAbilities(existingCard.ability),
-                ...normalizeAbilities(newCard.ability),
-            }).reduce((acc, [key, value]) => {
-                acc[key] =
-                    (existingCard.ability[key] || 0) +
-                    (newCard.ability[key] || 0);
-                return acc;
-            }, {}), // Merge abilities, adding values for duplicate abilities
-            level: Math.max(existingCard.level, newCard.level), // Max level
+            ],
+            name: `${existingCard.name} + ${newCard.name}`,
+            health: Number(existingCard.health) + Number(newCard.health),
+            attack: existingCard.attack + newCard.attack,
+            ability: combinedAbilities,
+            level: Math.max(existingCard.level, newCard.level),
             maxHealth: existingCard.maxHealth + newCard.maxHealth,
         };
-    };
+    };    
 
     const handleCardDrop = (slot, card) => {
         // Check if the card is already in a slot
