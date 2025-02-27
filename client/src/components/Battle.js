@@ -319,9 +319,6 @@ const Battle = () => {
                     </button>
                 </div>
             </div>
-            <div className="battle-log">
-                <BattleLog />
-            </div>
         </div>
     );
 };
