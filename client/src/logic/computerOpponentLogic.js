@@ -10,5 +10,6 @@ export function generateOpponentDeck() {
     level1: getRandomCards(cardsData.level1, 3),
     level2: getRandomCards(cardsData.level2, 3),
     level3: getRandomCards(cardsData.level3, 3),
+    level4: getRandomCards(cardsData.level4, 4),
   };
 }

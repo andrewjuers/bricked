@@ -31,6 +31,25 @@ const MultiplayerBattle = () => {
     const [initialGrid, setInitialGrid] = useState({});
     const [initialHand, setInitialHand] = useState([]);
 
+    useEffect(() => {
+        startTurn();
+        setIsEndTurnDisabled(false);
+        // eslint-disable-next-line
+    }, [turn]);
+
+    useEffect(() => {
+        const handleDoTurn = (state) => {
+            doTurn(state);
+        };
+
+        socket.on("do-turn", handleDoTurn);
+
+        return () => {
+            socket.off("do-turn", handleDoTurn);
+        };
+        // eslint-disable-next-line
+    }, []);
+
     const normalizeAbilities = (abilities) => {
         if (!abilities || typeof abilities !== "object") {
             return {}; // Return an empty object if no abilities
@@ -42,7 +61,7 @@ const MultiplayerBattle = () => {
         // Normalize abilities to ensure they are objects
         const existingAbilities = normalizeAbilities(existingCard.ability);
         const newAbilities = normalizeAbilities(newCard.ability);
-    
+
         // Merge abilities by adding values together
         let combinedAbilities = Object.entries({
             ...existingAbilities,
@@ -51,7 +70,7 @@ const MultiplayerBattle = () => {
             acc[key] = (existingAbilities[key] || 0) + (newAbilities[key] || 0);
             return acc;
         }, {});
-    
+
         // Check if either card has "Double Basic" and apply effect
         const hasDoubleBasic = existingCard.id === 32 || newCard.id === 32;
         if (hasDoubleBasic) {
@@ -61,10 +80,12 @@ const MultiplayerBattle = () => {
                 combinedAbilities[firstAbility] *= 2; // Double its value
             }
         }
-    
+
         return {
             id: [
-                ...(Array.isArray(existingCard.id) ? existingCard.id : [existingCard.id]),
+                ...(Array.isArray(existingCard.id)
+                    ? existingCard.id
+                    : [existingCard.id]),
                 newCard.id,
             ],
             name: `${existingCard.name} + ${newCard.name}`,
@@ -74,7 +95,7 @@ const MultiplayerBattle = () => {
             level: Math.max(existingCard.level, newCard.level),
             maxHealth: existingCard.maxHealth + newCard.maxHealth,
         };
-    };    
+    };
 
     const handleCardDrop = (slot, card) => {
         // Check if the card is already in a slot
@@ -248,25 +269,6 @@ const MultiplayerBattle = () => {
             return newGrid;
         });
     };
-
-    useEffect(() => {
-        startTurn();
-        setIsEndTurnDisabled(false);
-        // eslint-disable-next-line
-    }, [turn]);
-
-    useEffect(() => {
-        const handleDoTurn = (state) => {
-            doTurn(state);
-        };
-
-        socket.on("do-turn", handleDoTurn);
-
-        return () => {
-            socket.off("do-turn", handleDoTurn);
-        };
-        // eslint-disable-next-line
-    }, []);
 
     const handleEndTurnButtonClick = () => {
         setIsEndTurnDisabled(true); // Disable button on click

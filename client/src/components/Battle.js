@@ -7,11 +7,7 @@ import { useGame } from "../context/GameContext";
 import Chatbox from "./ChatBox";
 
 const Battle = () => {
-    const {
-        playerDeck,
-        opponentDeck,
-        goHome: onGoHome,
-    } = useGame();
+    const { playerDeck, opponentDeck, goHome: onGoHome } = useGame();
 
     const [hand, setHand] = useState([...playerDeck.level1]); // Player's current hand
     const [grid, setGrid] = useState({
@@ -33,6 +29,11 @@ const Battle = () => {
     const [initialGrid, setInitialGrid] = useState({});
     const [initialHand, setInitialHand] = useState([]);
 
+    useEffect(() => {
+        startTurn();
+        // eslint-disable-next-line
+    }, [turn]);
+
     const normalizeAbilities = (abilities) => {
         if (!abilities || typeof abilities !== "object") {
             return {};
@@ -44,7 +45,7 @@ const Battle = () => {
         // Normalize abilities to ensure they are objects
         const existingAbilities = normalizeAbilities(existingCard.ability);
         const newAbilities = normalizeAbilities(newCard.ability);
-    
+
         // Merge abilities by adding values together
         let combinedAbilities = Object.entries({
             ...existingAbilities,
@@ -53,7 +54,7 @@ const Battle = () => {
             acc[key] = (existingAbilities[key] || 0) + (newAbilities[key] || 0);
             return acc;
         }, {});
-    
+
         // Check if either card has "Double Basic" and apply effect
         const hasDoubleBasic = existingCard.id === 32 || newCard.id === 32;
         if (hasDoubleBasic) {
@@ -63,10 +64,12 @@ const Battle = () => {
                 combinedAbilities[firstAbility] *= 2; // Double its value
             }
         }
-    
+
         return {
             id: [
-                ...(Array.isArray(existingCard.id) ? existingCard.id : [existingCard.id]),
+                ...(Array.isArray(existingCard.id)
+                    ? existingCard.id
+                    : [existingCard.id]),
                 newCard.id,
             ],
             name: `${existingCard.name} + ${newCard.name}`,
@@ -76,7 +79,7 @@ const Battle = () => {
             level: Math.max(existingCard.level, newCard.level),
             maxHealth: existingCard.maxHealth + newCard.maxHealth,
         };
-    };    
+    };
 
     const handleCardDrop = (slot, card) => {
         const isCardAlreadyInSlot = Object.values(grid).some(
@@ -141,6 +144,7 @@ const Battle = () => {
                     }
                 }
             }
+
             return newGrid;
         });
 
@@ -175,32 +179,29 @@ const Battle = () => {
             [grid.slot4, grid.slot5, grid.slot6]
         );
 
-        setGrid({
+        const newGrid = {
             slot1:
-                updatedPlayerCards[0] && updatedPlayerCards[0].health > 0
+                updatedPlayerCards[0]?.health > 0
                     ? updatedPlayerCards[0]
                     : null,
             slot2:
-                updatedPlayerCards[1] && updatedPlayerCards[1].health > 0
+                updatedPlayerCards[1]?.health > 0
                     ? updatedPlayerCards[1]
                     : null,
             slot3:
-                updatedPlayerCards[2] && updatedPlayerCards[2].health > 0
+                updatedPlayerCards[2]?.health > 0
                     ? updatedPlayerCards[2]
                     : null,
             slot4:
-                updatedEnemyCards[0] && updatedEnemyCards[0].health > 0
-                    ? updatedEnemyCards[0]
-                    : null,
+                updatedEnemyCards[0]?.health > 0 ? updatedEnemyCards[0] : null,
             slot5:
-                updatedEnemyCards[1] && updatedEnemyCards[1].health > 0
-                    ? updatedEnemyCards[1]
-                    : null,
+                updatedEnemyCards[1]?.health > 0 ? updatedEnemyCards[1] : null,
             slot6:
-                updatedEnemyCards[2] && updatedEnemyCards[2].health > 0
-                    ? updatedEnemyCards[2]
-                    : null,
-        });
+                updatedEnemyCards[2]?.health > 0 ? updatedEnemyCards[2] : null,
+        };
+
+        setGrid(newGrid);
+
         if (turn <= 2) return;
 
         const playerSlotsEmpty = updatedPlayerCards.every(
@@ -254,6 +255,7 @@ const Battle = () => {
             return newGrid;
         });
         setInitialHand(hand);
+
         if (turn > 1) doTurn();
     };
 
@@ -266,11 +268,6 @@ const Battle = () => {
             return newGrid;
         });
     };
-
-    useEffect(() => {
-        startTurn();
-        // eslint-disable-next-line
-    }, [turn]);
 
     return (
         <div className="battle-container">
@@ -321,6 +318,9 @@ const Battle = () => {
                         Reset Turn
                     </button>
                 </div>
+            </div>
+            <div className="battle-log">
+                <BattleLog />
             </div>
         </div>
     );

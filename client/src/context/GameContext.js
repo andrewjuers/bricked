@@ -16,7 +16,7 @@ export function GameProvider({ children }) {
     const [roomId, setRoomId] = useState("NOT IN GAME");
 
     // New state for battle log
-    const [battleLog, setBattleLog] = useState({});
+    const [battleLog, setBattleLog] = useState([]);
 
     const handleSelectionComplete = (selectedCards) => {
         setPlayerDeck(selectedCards);
