@@ -4,6 +4,7 @@ import cardsData from "../data/cards.json"; // Import JSON data
 import "./HomeScreen.css";
 import Chatbox from "./ChatBox";
 import { useGame } from "../context/GameContext";
+import { createDylanDeck } from "../logic/customDecks";
 
 function HomeScreen() {
     const {
@@ -63,7 +64,9 @@ function HomeScreen() {
 
             // Randomly shuffle the cards
             while (randomCards.length < 3) {
-                const randomIndex = Math.floor(Math.random() * availableCards.length);
+                const randomIndex = Math.floor(
+                    Math.random() * availableCards.length
+                );
                 const card = availableCards[randomIndex];
                 if (!randomCards.some((c) => c.id === card.id)) {
                     randomCards.push(card);
@@ -82,7 +85,10 @@ function HomeScreen() {
             <Chatbox />
             <button onClick={() => goCreateCard()}>Create Card</button>
             {/* Button to select random team */}
-            <button onClick={selectRandomTeam}>Select Random Team</button>
+            <button onClick={selectRandomTeam}>Select Random Deck</button>
+            <button onClick={() => setSelectedCards(createDylanDeck)}>
+                Select Dylan's Bad Deck
+            </button>
             {/* Include level4 in the mapping */}
             {["level1", "level2", "level3", "level4"].map((level) => (
                 <div key={level}>
@@ -120,10 +126,12 @@ function HomeScreen() {
                 onClick={() => goLobby(selectedCards)}
                 disabled={
                     !(
-                        selectedCards.level1.length === 3 &&
-                        selectedCards.level2.length === 3 &&
-                        selectedCards.level3.length === 3 &&
-                        selectedCards.level4.length === 3 // Check for level4
+                        (
+                            selectedCards.level1.length === 3 &&
+                            selectedCards.level2.length === 3 &&
+                            selectedCards.level3.length === 3 &&
+                            selectedCards.level4.length === 3
+                        ) // Check for level4
                     )
                 }
             >
