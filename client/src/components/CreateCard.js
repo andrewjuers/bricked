@@ -14,7 +14,7 @@ const CreateCard = () => {
     const [abilityValue, setAbilityValue] = useState(0);
     const [cardDataJson, setCardDataJson] = useState(""); // New state for JSON data
 
-    const totalPoints = level * 10;
+    const totalPoints = level * 2 + 10;
     const minHealth = level * 7 - 2 * level;
     const maxHealth = level * 7 + 2 * level;
     const minAttack = level * 3 - 2 * level;
