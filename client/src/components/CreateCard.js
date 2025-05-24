@@ -26,8 +26,8 @@ const CreateCard = () => {
     const handleLevelChange = (e) => {
         const newLevel = parseInt(e.target.value);
         setLevel(newLevel);
-        setHealth(newLevel * 7);
-        setAttack(newLevel * 3);
+        setHealth(newLevel * 7 + newLevel - 1);
+        setAttack(newLevel * 3 + newLevel - 1);
         setAbilityValue(0);
     };
 
