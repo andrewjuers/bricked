@@ -74,7 +74,7 @@ const Battle = () => {
             ],
             name: `${existingCard.name} + ${newCard.name}`,
             health: Number(existingCard.health) + Number(newCard.health),
-            attack: existingCard.attack + newCard.attack,
+            attack: (existingCard.attack > newCard.attack) ? existingCard.attack : newCard.attack,
             ability: combinedAbilities,
             level: Math.max(existingCard.level, newCard.level),
             maxHealth: existingCard.maxHealth + newCard.maxHealth,
