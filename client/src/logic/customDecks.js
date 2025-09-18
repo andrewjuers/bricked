@@ -1,34 +1,22 @@
-import cardsData from "../data/cards.json";
+import cardsData from "../data/cards2.json";
 
-const dylanDeck = {
-    level1: ["Deer", "Chicken", "Fish"],
-    level2: ["Cat", "Moose", "Bat"],
-    level3: ["Worm", "Bull", "Lion"],
-    level4: ["Lizard", "Horse", "Whale"],
-};
+const dylanDeck = ["Deer", "Chicken", "Fish", "Cat", "Moose", "Bat", "Worm", "Bull", "Lion", "Lizard", "Horse", "Whale"];
 
 // Function to get a card by name from cardsData
 function getCard(name) {
-    for (let level in cardsData) {
-        let card = cardsData[level].find(
-            (card) => card.name.toLowerCase() === name.toLowerCase()
-        );
-        if (card) return card;
-    }
-    return null; // Return null if not found
+    return cardsData.find(
+        (card) => card.name.toLowerCase() === name.toLowerCase()
+    ) || null; // Return null if not found
 }
 
-// Function to create a custom deck
+// Function to create a custom deck (flat array of cards)
 export function createCustomDeck(cardNames) {
-    let deck = { level1: [], level2: [], level3: [], level4: [] };
+    let deck = [];
 
     cardNames.forEach((name) => {
         let card = getCard(name);
         if (card) {
-            let levelKey = `level${card.level}`;
-            if (deck[levelKey]) {
-                deck[levelKey].push(card);
-            }
+            deck.push(card);
         }
     });
 
@@ -37,6 +25,5 @@ export function createCustomDeck(cardNames) {
 
 // Function to create Dylan's deck
 export function createDylanDeck() {
-    let cardNames = Object.values(dylanDeck).flat();
-    return createCustomDeck(cardNames);
+    return createCustomDeck(dylanDeck);
 }

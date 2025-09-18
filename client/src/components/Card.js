@@ -1,6 +1,6 @@
 import React from "react";
 import "./Card.css";
-import cards from "../data/cards.json";
+import cards from "../data/cards2.json";
 
 // Utility function to calculate max health
 const calculateMaxHealth = (idOrIds) => {

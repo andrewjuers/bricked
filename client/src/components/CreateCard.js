@@ -16,7 +16,7 @@ const CreateCard = () => {
 
     const levelMod = level - 1;
 
-    const totalPoints = (level == 1) ? 10 : level * 2 + 10;
+    const totalPoints = (level === 1) ? 10 : level * 2 + 10;
     const minHealth = level * 7 - 2 + levelMod;
     const maxHealth = level * 7 + 2 + levelMod;
     const minAttack = level * 3 - 2 + levelMod;

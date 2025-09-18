@@ -9,7 +9,27 @@ import Chatbox from "./ChatBox";
 const Battle = () => {
     const { playerDeck, opponentDeck, goHome: onGoHome } = useGame();
 
-    const [hand, setHand] = useState([...playerDeck.level1]); // Player's current hand
+    // Shuffle helper (Fisher-Yates)
+    const shuffle = (array) => {
+        const arr = Array.isArray(array) ? [...array] : [];
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    };
+
+    // Shuffle both decks on mount
+    const [playerDeckShuffled] = useState(() => shuffle(playerDeck));
+    const [opponentDeckShuffled] = useState(() => shuffle(opponentDeck));
+
+    // Draw first 3 and keep remaining as draw pile
+    const [hand, setHand] = useState(playerDeckShuffled.slice(0, 3));
+    const [remainingDeck, setRemainingDeck] = useState(playerDeckShuffled.slice(3));
+
+    const [opponentHand, setOpponentHand] = useState(opponentDeckShuffled.slice(0, 3));
+    const [opponentRemainingDeck, setOpponentRemainingDeck] = useState(opponentDeckShuffled.slice(3));
+
     const [grid, setGrid] = useState({
         slot1: null,
         slot2: null,
@@ -18,20 +38,21 @@ const Battle = () => {
         slot5: null,
         slot6: null,
     });
-    const [opponentCards, setOpponentCards] = useState([
-        ...opponentDeck.level1,
-    ]);
+
     const [turn, setTurn] = useState(1);
-    const [currentLevel, setCurrentLevel] = useState(1); // Track player's deck level
     const [gameOver, setGameOver] = useState(false);
-    const [gameResult, setGameResult] = useState(""); // "Victory" or "Defeat"
+    const [gameResult, setGameResult] = useState("");
 
     const [initialGrid, setInitialGrid] = useState({});
     const [initialHand, setInitialHand] = useState([]);
 
+    // pendingMerge holds data when player dropped a card onto occupied slot (turn >= 2)
+    // shape: { slot, existingCard, newCard } or null
+    const [pendingMerge, setPendingMerge] = useState(null);
+
     useEffect(() => {
         startTurn();
-        // eslint-disable-next-line
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [turn]);
 
     const normalizeAbilities = (abilities) => {
@@ -41,47 +62,58 @@ const Battle = () => {
         return abilities;
     };
 
-    const combineCards = (existingCard, newCard) => {
-        // Normalize abilities to ensure they are objects
+    // combineCards now accepts chosenStat: 'health' | 'attack' | 'ability'
+    const combineCards = (existingCard, newCard, chosenStat) => {
         const existingAbilities = normalizeAbilities(existingCard.ability);
         const newAbilities = normalizeAbilities(newCard.ability);
 
-        // Merge abilities by adding values together
-        let combinedAbilities = Object.entries({
-            ...existingAbilities,
-            ...newAbilities,
-        }).reduce((acc, [key, value]) => {
-            acc[key] = (existingAbilities[key] || 0) + (newAbilities[key] || 0);
-            return acc;
-        }, {});
+        const combinedId = [
+            ...(Array.isArray(existingCard.id) ? existingCard.id : [existingCard.id]),
+            newCard.id,
+        ];
 
-        // Check if either card has "Double Basic" and apply effect
-        const hasDoubleBasic = existingCard.id === 32 || newCard.id === 32;
-        if (hasDoubleBasic) {
-            const abilityKeys = Object.keys(combinedAbilities);
-            if (abilityKeys.length > 0) {
-                const firstAbility = abilityKeys[0]; // Get the first ability key
-                combinedAbilities[firstAbility] *= 2; // Double its value
-            }
+        // default values: take most from newCard
+        const result = {
+            id: combinedId,
+            name: `${existingCard.name} + ${newCard.name}`,
+            // default: adopt new card's base stats
+            health: Number(newCard.health),
+            attack: Number(newCard.attack),
+            ability: { ...newAbilities },
+            maxHealth: Number(newCard.maxHealth || newCard.health || 0),
+            level: Math.max(existingCard.level || 1, newCard.level || 1),
+        };
+
+        if (chosenStat === "health") {
+            // combine health & maxHealth, keep new card's attack & ability
+            result.health = Number(existingCard.health || 0) + Number(newCard.health || 0);
+            result.maxHealth = Number(existingCard.maxHealth || 0) + Number(newCard.maxHealth || 0);
+            // attack & ability already set to newCard's
+        } else if (chosenStat === "attack") {
+            // combine attack, keep new health & ability
+            result.attack = Number(existingCard.attack || 0) + Number(newCard.attack || 0);
+            // health/maxHealth/ability remain from newCard
+        } else if (chosenStat === "ability") {
+            // merge ability objects by summing values
+            const mergedAbilities = Object.entries({
+                ...existingAbilities,
+                ...newAbilities,
+            }).reduce((acc, [key, value]) => {
+                acc[key] = (existingAbilities[key] || 0) + (newAbilities[key] || 0);
+                return acc;
+            }, {});
+            result.ability = mergedAbilities;
+            // health/attack remain from newCard
         }
 
-        return {
-            id: [
-                ...(Array.isArray(existingCard.id)
-                    ? existingCard.id
-                    : [existingCard.id]),
-                newCard.id,
-            ],
-            name: `${existingCard.name} + ${newCard.name}`,
-            health: Number(existingCard.health) + Number(newCard.health),
-            attack: (existingCard.attack > newCard.attack) ? existingCard.attack : newCard.attack,
-            ability: combinedAbilities,
-            level: Math.max(existingCard.level, newCard.level),
-            maxHealth: existingCard.maxHealth + newCard.maxHealth,
-        };
+        return result;
     };
 
+    // When dropping a card into a slot
     const handleCardDrop = (slot, card) => {
+        // protect against invalid input
+        if (!card) return;
+
         const isCardAlreadyInSlot = Object.values(grid).some(
             (existingCard) =>
                 existingCard &&
@@ -93,52 +125,68 @@ const Battle = () => {
             return;
         }
 
+        // empty player slots: slot1-slot3
         if (grid[slot] === null && ["slot1", "slot2", "slot3"].includes(slot)) {
+            // place directly and remove from hand
             setGrid((prevGrid) => ({
                 ...prevGrid,
                 [slot]: card,
             }));
-            setHand((prevHand) =>
-                prevHand.filter((item) => item.id !== card.id)
-            );
-        } else if (
-            turn > 1 &&
-            grid[slot] !== null &&
-            ["slot1", "slot2", "slot3"].includes(slot)
-        ) {
-            const existingCard = grid[slot];
-
-            if (existingCard.level !== card.level) {
-                const combinedCard = combineCards(existingCard, card);
-
-                setGrid((prevGrid) => ({
-                    ...prevGrid,
-                    [slot]: combinedCard,
-                }));
-                setHand((prevHand) =>
-                    prevHand.filter((item) => item.id !== card.id)
-                );
-            } else {
-                alert("Can't do!");
-            }
+            setHand((prevHand) => prevHand.filter((item) => item.id !== card.id));
+            return;
         }
+
+        // If slot occupied and turn >= 2, prompt for stat choice (set pendingMerge)
+        if (turn > 1 && grid[slot] !== null && ["slot1", "slot2", "slot3"].includes(slot)) {
+            const existingCard = grid[slot];
+            // set pending merge; we do NOT remove new card from hand yet
+            setPendingMerge({ slot, existingCard, newCard: card });
+            return;
+        }
+
+        // fallback (should not usually hit)
+        alert("Can't place card here.");
     };
 
+    // finish merge after player chooses a stat
+    const finishMerge = (chosenStat) => {
+        if (!pendingMerge) return;
+        const { slot, existingCard, newCard } = pendingMerge;
+
+        const combinedCard = combineCards(existingCard, newCard, chosenStat);
+
+        setGrid((prevGrid) => ({
+            ...prevGrid,
+            [slot]: combinedCard,
+        }));
+
+        // remove newCard from hand now that merge confirmed
+        setHand((prevHand) => prevHand.filter((c) => c.id !== newCard.id));
+
+        setPendingMerge(null);
+    };
+
+    const cancelMerge = () => {
+        setPendingMerge(null);
+    };
+
+    // End turn logic: opponent places their hand onto slots 4-6 (combine automatically using old rule)
     const handleEndTurn = () => {
         setGrid((prevGrid) => {
             let newGrid = { ...prevGrid };
 
-            if (opponentCards.length > 0) {
-                for (let i = 0; i < 3; i++) {
+            if (opponentHand.length > 0) {
+                for (let i = 0; i < opponentHand.length; i++) {
                     const slot = `slot${4 + i}`;
-                    const opponentCard = opponentCards[i];
+                    const opponentCard = opponentHand[i];
                     const existingCard = newGrid[slot];
 
                     if (existingCard) {
-                        newGrid[slot] = combineCards(
-                            existingCard,
-                            opponentCard
-                        );
+                        // opponent combining uses previous combined logic (sum everything)
+                        const combined = combineCards(existingCard, opponentCard, "health"); 
+                        // NOTE: we choose "health" combine here as a fast approach to add HP (you can change).
+                        // If you want opponents to use different combine rules, modify as needed.
+                        newGrid[slot] = combined;
                     } else {
                         newGrid[slot] = opponentCard;
                     }
@@ -148,31 +196,17 @@ const Battle = () => {
             return newGrid;
         });
 
-        setTurn(turn + 1);
+        setTurn((t) => t + 1);
 
-        setOpponentCards([]);
-        if (currentLevel === 1 && opponentDeck.level2) {
-            setOpponentCards([...opponentDeck.level2]);
-        } else if (currentLevel === 2 && opponentDeck.level3) {
-            setOpponentCards([...opponentDeck.level3]);
-        } else if (currentLevel === 3 && opponentDeck.level4) {
-            setOpponentCards([...opponentDeck.level4]);
-        }
+        // draw new hands if possible
+        setHand(remainingDeck.slice(0, 3));
+        setRemainingDeck((prev) => prev.slice(3));
 
-        if (hand.length === 0) {
-            if (currentLevel === 1 && playerDeck.level2) {
-                setHand([...playerDeck.level2]);
-                setCurrentLevel(2);
-            } else if (currentLevel === 2 && playerDeck.level3) {
-                setHand([...playerDeck.level3]);
-                setCurrentLevel(3);
-            } else if (currentLevel === 3 && playerDeck.level4) {
-                setHand([...playerDeck.level4]);
-                setCurrentLevel(4);
-            }
-        }
+        setOpponentHand(opponentRemainingDeck.slice(0, 3));
+        setOpponentRemainingDeck((prev) => prev.slice(3));
     };
 
+    // battle resolution using your handleBattleTurn
     const doTurn = () => {
         const { updatedPlayerCards, updatedEnemyCards } = handleBattleTurn(
             [grid.slot1, grid.slot2, grid.slot3],
@@ -180,24 +214,12 @@ const Battle = () => {
         );
 
         const newGrid = {
-            slot1:
-                updatedPlayerCards[0]?.health > 0
-                    ? updatedPlayerCards[0]
-                    : null,
-            slot2:
-                updatedPlayerCards[1]?.health > 0
-                    ? updatedPlayerCards[1]
-                    : null,
-            slot3:
-                updatedPlayerCards[2]?.health > 0
-                    ? updatedPlayerCards[2]
-                    : null,
-            slot4:
-                updatedEnemyCards[0]?.health > 0 ? updatedEnemyCards[0] : null,
-            slot5:
-                updatedEnemyCards[1]?.health > 0 ? updatedEnemyCards[1] : null,
-            slot6:
-                updatedEnemyCards[2]?.health > 0 ? updatedEnemyCards[2] : null,
+            slot1: updatedPlayerCards[0]?.health > 0 ? updatedPlayerCards[0] : null,
+            slot2: updatedPlayerCards[1]?.health > 0 ? updatedPlayerCards[1] : null,
+            slot3: updatedPlayerCards[2]?.health > 0 ? updatedPlayerCards[2] : null,
+            slot4: updatedEnemyCards[0]?.health > 0 ? updatedEnemyCards[0] : null,
+            slot5: updatedEnemyCards[1]?.health > 0 ? updatedEnemyCards[1] : null,
+            slot6: updatedEnemyCards[2]?.health > 0 ? updatedEnemyCards[2] : null,
         };
 
         setGrid(newGrid);
@@ -218,6 +240,7 @@ const Battle = () => {
         }
     };
 
+    // Reset turn logic (preserve dead removal)
     const resetTurn = () => {
         if (turn === 1) {
             setGrid({
@@ -236,7 +259,6 @@ const Battle = () => {
                         newGrid[slot] = null;
                     }
                 });
-
                 return newGrid;
             });
         }
@@ -244,6 +266,7 @@ const Battle = () => {
         setHand(initialHand);
     };
 
+    // Start Turn: capture initial grid/hand for reset, then run auto-battle if turn > 1
     const startTurn = () => {
         setInitialGrid(() => {
             let newGrid = { ...grid };
@@ -283,41 +306,50 @@ const Battle = () => {
                 )}
                 <button onClick={onGoHome}>Back to Home</button>
                 <h2>Turn {turn}</h2>
-                <BattleGrid
-                    grid={grid}
-                    onCardDrop={handleCardDrop}
-                    turn={turn}
-                />
+
+                <BattleGrid grid={grid} onCardDrop={handleCardDrop} turn={turn} />
+
                 <div>
-                    <button onClick={() => swapCards("slot1", "slot2")}>
-                        Swap Slots 1 & 2
-                    </button>
-                    <button onClick={() => swapCards("slot2", "slot3")}>
-                        Swap Slots 2 & 3
-                    </button>
+                    <button onClick={() => swapCards("slot1", "slot2")}>Swap Slots 1 & 2</button>
+                    <button onClick={() => swapCards("slot2", "slot3")}>Swap Slots 2 & 3</button>
                 </div>
+
                 <div className="player-cards">
                     {hand.map((card) => (
-                        <Card key={card.id} card={card} />
+                        <Card key={Array.isArray(card.id) ? card.id.join("-") : card.id} card={card} />
                     ))}
                 </div>
+
                 <div className="action-buttons">
                     <button
                         onClick={handleEndTurn}
                         disabled={
-                            (Object.values(grid)
-                                .slice(0, 3)
-                                .some((slot) => slot === null) &&
+                            (Object.values(grid).slice(0, 3).some((slot) => slot === null) &&
                                 hand.length > 0) ||
-                            gameOver
+                            gameOver ||
+                            !!pendingMerge // don't allow end-turn when waiting for merge choice
                         }
                     >
                         End Turn
                     </button>
-                    <button onClick={resetTurn} disabled={gameOver}>
-                        Reset Turn
-                    </button>
+                    <button onClick={resetTurn} disabled={gameOver || !!pendingMerge}>Reset Turn</button>
                 </div>
+
+                {/* Pending merge UI */}
+                {pendingMerge && (
+                    <div className="merge-choice-overlay">
+                        <div className="merge-choice">
+                            <h3>Combine "{pendingMerge.newCard.name}" with "{pendingMerge.existingCard.name}"</h3>
+                            <p>Choose one stat to combine (others will be from the new card):</p>
+                            <div className="merge-buttons">
+                                <button onClick={() => finishMerge("health")}>Combine Health</button>
+                                <button onClick={() => finishMerge("attack")}>Combine Attack</button>
+                                <button onClick={() => finishMerge("ability")}>Combine Ability</button>
+                                <button onClick={cancelMerge}>Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

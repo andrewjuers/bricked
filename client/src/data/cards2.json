@@ -1,0 +1,292 @@
+{
+  "cards": [
+    {
+      "id": 0,
+      "name": "Deer",
+      "level": 1,
+      "health": 6,
+      "maxHealth": 6,
+      "attack": 2,
+      "ability": { "Right Attack": 2 }
+    },
+    {
+      "id": 1,
+      "name": "Chicken",
+      "level": 1,
+      "health": 6,
+      "maxHealth": 6,
+      "attack": 4,
+      "ability": {}
+    },
+    {
+      "id": 2,
+      "name": "Fish",
+      "level": 1,
+      "health": 8,
+      "maxHealth": 8,
+      "attack": 1,
+      "ability": { "Left Attack": 1 }
+    },
+    {
+      "id": 3,
+      "name": "Beaver",
+      "level": 1,
+      "health": 6,
+      "maxHealth": 6,
+      "attack": 1,
+      "ability": { "Heal Team": 3 }
+    },
+    {
+      "id": 4,
+      "name": "Fox",
+      "level": 1,
+      "health": 6,
+      "maxHealth": 6,
+      "attack": 3,
+      "ability": { "Power-Up": 1 }
+    },
+    {
+      "id": 6,
+      "name": "Egg",
+      "level": 1,
+      "health": 5,
+      "maxHealth": 5,
+      "attack": 1,
+      "ability": { "Shield": 4 }
+    },
+    {
+      "id": 7,
+      "name": "Turtle",
+      "level": 1,
+      "health": 7,
+      "maxHealth": 7,
+      "attack": 1,
+      "ability": { "Armor": 2 }
+    },
+    {
+      "id": 8,
+      "name": "Hedgehog",
+      "level": 1,
+      "health": 7,
+      "maxHealth": 7,
+      "attack": 2,
+      "ability": { "Thorns": 1 }
+    },
+    {
+      "id": 9,
+      "name": "Possum",
+      "level": 1,
+      "health": 6,
+      "maxHealth": 6,
+      "attack": 3,
+      "ability": { "Endurance": 1 }
+    },
+    {
+      "id": 10,
+      "name": "Goat",
+      "level": 1,
+      "health": 6,
+      "maxHealth": 6,
+      "attack": 2,
+      "ability": { "Heal Self": 2 }
+    },
+    {
+      "id": 11,
+      "name": "Wolf",
+      "level": 1,
+      "health": 5,
+      "maxHealth": 5,
+      "attack": 3,
+      "ability": { "Life Steal": 2 }
+    },
+    {
+      "id": 12,
+      "name": "Koala",
+      "level": 1,
+      "health": 7,
+      "maxHealth": 7,
+      "attack": 3,
+      "ability": {}
+    },
+    {
+      "id": 13,
+      "name": "Cat",
+      "level": 1,
+      "health": 5,
+      "maxHealth": 5,
+      "attack": 3,
+      "ability": { "Adjacent Attack": 2 }
+    },
+    {
+      "id": 14,
+      "name": "Moose",
+      "level": 1,
+      "health": 6,
+      "maxHealth": 6,
+      "attack": 2,
+      "ability": { "Right Attack": 2 }
+    },
+    {
+      "id": 15,
+      "name": "Goose",
+      "level": 1,
+      "health": 6,
+      "maxHealth": 6,
+      "attack": 2,
+      "ability": { "Left Attack": 2 }
+    },
+    {
+      "id": 16,
+      "name": "Bat",
+      "level": 1,
+      "health": 2,
+      "maxHealth": 2,
+      "attack": 3,
+      "ability": { "Rivalry (Attack)": 5 }
+    },
+    {
+      "id": 17,
+      "name": "Worm",
+      "level": 1,
+      "health": 4,
+      "maxHealth": 4,
+      "attack": 2,
+      "ability": { "Adjacent Attack": 4 }
+    },
+    {
+      "id": 18,
+      "name": "Bull",
+      "level": 1,
+      "health": 5,
+      "maxHealth": 5,
+      "attack": 4,
+      "ability": { "Recoil": 1 }
+    },
+    {
+      "id": 19,
+      "name": "Axolotl",
+      "level": 1,
+      "health": 7,
+      "maxHealth": 7,
+      "attack": 2,
+      "ability": { "Sweep Attack": 1 }
+    },
+    {
+      "id": 20,
+      "name": "Snail",
+      "level": 1,
+      "health": 7,
+      "maxHealth": 7,
+      "attack": 3,
+      "ability": {}
+    },
+    {
+      "id": 21,
+      "name": "Crow",
+      "level": 1,
+      "health": 5,
+      "maxHealth": 5,
+      "attack": 2,
+      "ability": { "Life Steal": 3 }
+    },
+    {
+      "id": 22,
+      "name": "Lion",
+      "level": 1,
+      "health": 3,
+      "maxHealth": 3,
+      "attack": 2,
+      "ability": { "Rivalry (Health)": 5 }
+    },
+    {
+      "id": 23,
+      "name": "Rhino",
+      "level": 1,
+      "health": 3,
+      "maxHealth": 3,
+      "attack": 2,
+      "ability": { "Immunity": 5 }
+    },
+    {
+      "id": 24,
+      "name": "Owl",
+      "level": 1,
+      "health": 4,
+      "maxHealth": 4,
+      "attack": 2,
+      "ability": { "Heal Self": 4 }
+    },
+    {
+      "id": 25,
+      "name": "Badger",
+      "level": 1,
+      "health": 5,
+      "maxHealth": 5,
+      "attack": 3,
+      "ability": { "Power-Up": 2 }
+    },
+    {
+      "id": 26,
+      "name": "Lizard",
+      "level": 1,
+      "health": 5,
+      "maxHealth": 5,
+      "attack": 3,
+      "ability": { "Right Attack": 2 }
+    },
+    {
+      "id": 27,
+      "name": "Horse",
+      "level": 1,
+      "health": 5,
+      "maxHealth": 5,
+      "attack": 3,
+      "ability": { "Left Attack": 2 }
+    },
+    {
+      "id": 28,
+      "name": "Ostrich",
+      "level": 1,
+      "health": 6,
+      "maxHealth": 6,
+      "attack": 2,
+      "ability": { "Armor": 2 }
+    },
+    {
+      "id": 29,
+      "name": "Whale",
+      "level": 1,
+      "health": 7,
+      "maxHealth": 7,
+      "attack": 3,
+      "ability": {}
+    },
+    {
+      "id": 30,
+      "name": "Sea Urchin",
+      "level": 1,
+      "health": 3,
+      "maxHealth": 3,
+      "attack": 3,
+      "ability": { "Thorns": 4 }
+    },
+    {
+      "id": 31,
+      "name": "Dolphin",
+      "level": 1,
+      "health": 3,
+      "maxHealth": 3,
+      "attack": 1,
+      "ability": { "Heal Team": 6 }
+    },
+    {
+      "id": 32,
+      "name": "Thunderbird",
+      "level": 1,
+      "health": 3,
+      "maxHealth": 3,
+      "attack": 3,
+      "ability": { "Double Basic": 4 }
+    }
+  ]
+}

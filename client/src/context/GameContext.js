@@ -5,12 +5,9 @@ const GameContext = createContext();
 
 export function GameProvider({ children }) {
     const [currentScreen, setCurrentScreen] = useState("home");
-    const [playerDeck, setPlayerDeck] = useState({
-        level1: [],
-        level2: [],
-        level3: [],
-        level4: [],
-    });
+
+    // ✅ single deck array instead of level1, level2, level3, level4
+    const [playerDeck, setPlayerDeck] = useState([]);
     const [opponentDeck, setOpponentDeck] = useState(null);
     const [playerNumber, setPlayerNumber] = useState(null);
     const [roomId, setRoomId] = useState("NOT IN GAME");
@@ -19,17 +16,19 @@ export function GameProvider({ children }) {
     const [battleLog, setBattleLog] = useState([]);
 
     const handleSelectionComplete = (selectedCards) => {
-        setPlayerDeck(selectedCards);
+        setPlayerDeck(selectedCards); // selectedCards is now just an array
         setOpponentDeck(generateOpponentDeck());
         setCurrentScreen("battle");
     };
 
     const goHome = () => setCurrentScreen("home");
     const goCreateCard = () => setCurrentScreen("create-card");
+
     const goLobby = (selectedCards) => {
-        setPlayerDeck(selectedCards);
+        setPlayerDeck(selectedCards); // array of 12 cards
         setCurrentScreen("lobby");
     };
+
     const startMultiBattle = () => setCurrentScreen("multi-battle");
 
     return (
@@ -50,7 +49,7 @@ export function GameProvider({ children }) {
                 startMultiBattle,
                 goCreateCard,
                 battleLog,
-                setBattleLog
+                setBattleLog,
             }}
         >
             {children}

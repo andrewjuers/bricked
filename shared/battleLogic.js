@@ -11,14 +11,14 @@ const handleCardAbilitiesBefore = (cards, opponentCards) => {
                     console.warn("Card missing health or maxHealth:", c);
                     return c; // Skip cards with missing health properties
                 }
-                applyHeal(c, card.ability["Heal Team"] / 3);
+                applyHeal(c, Math.floor(card.ability["Heal Team"] / 3));
                 return c;
             });
         }
 
         // Heal Self
         if (card.ability?.["Heal Self"]) {
-            applyHeal(card, card.ability["Heal Self"] / 2);
+            applyHeal(card, Math.floor(card.ability["Heal Self"] / 2));
         }
 
         // Attack Abilities
@@ -32,7 +32,7 @@ const handleCardAbilitiesBefore = (cards, opponentCards) => {
                 applyDamage(
                     card,
                     opponentCards[i + 1],
-                    card.ability["Right Attack"]
+                    Math.floor(card.ability["Right Attack"])
                 );
             }
 
@@ -45,7 +45,7 @@ const handleCardAbilitiesBefore = (cards, opponentCards) => {
                 applyDamage(
                     card,
                     opponentCards[i - 1],
-                    card.ability["Left Attack"]
+                    Math.floor(card.ability["Left Attack"])
                 );
             }
 
@@ -55,14 +55,14 @@ const handleCardAbilitiesBefore = (cards, opponentCards) => {
                     applyDamage(
                         card,
                         opponentCards[i + 1],
-                        card.ability["Adjacent Attack"] / 2
+                        Math.floor(card.ability["Adjacent Attack"] / 2)
                     );
                 }
                 if (i > 0 && opponentCards[i - 1]) {
                     applyDamage(
                         card,
                         opponentCards[i - 1],
-                        card.ability["Adjacent Attack"] / 2
+                        Math.floor(card.ability["Adjacent Attack"] / 2)
                     );
                 }
             }
@@ -74,7 +74,7 @@ const handleCardAbilitiesBefore = (cards, opponentCards) => {
                         applyDamage(
                             card,
                             opponentCard,
-                            card.ability["Sweep Attack"] / 3
+                            Math.floor(card.ability["Sweep Attack"] / 3)
                         );
                     }
                 });
@@ -96,7 +96,7 @@ const handleCardAbilitiesAfter = (playerCards, enemyCards) => {
         if (playerCard) {
             // Power-Up ability (Increase attack after the battle phase)
             if (playerCard.ability?.["Power-Up"]) {
-                playerCard.attack += playerCard.ability["Power-Up"];
+                playerCard.attack += Math.floor(playerCard.ability["Power-Up"]);
             }
 
             // Check interaction with the enemy card in the same position
@@ -105,7 +105,6 @@ const handleCardAbilitiesAfter = (playerCards, enemyCards) => {
                     playerCard.ability?.["Immunity"] &&
                     enemyCard.ability?.["Immunity"]
                 ) {
-                    // Example: If both have immunity, do something special
                     console.log(`Both cards at position ${i} have Immunity.`);
                 }
             }
@@ -115,22 +114,18 @@ const handleCardAbilitiesAfter = (playerCards, enemyCards) => {
                 delete playerCard.ability["Shield"];
             }
 
-            // Check health after battle
             checkCardHealth(playerCard);
         }
 
         if (enemyCard) {
-            // Power-Up ability
             if (enemyCard.ability?.["Power-Up"]) {
-                enemyCard.attack += enemyCard.ability["Power-Up"];
+                enemyCard.attack += Math.floor(enemyCard.ability["Power-Up"]);
             }
 
-            // Remove one-time use abilities
             if (enemyCard.ability?.["Shield"]) {
                 delete enemyCard.ability["Shield"];
             }
 
-            // Check health after battle
             checkCardHealth(enemyCard);
         }
     }
@@ -141,26 +136,25 @@ const handleCardAbilitiesAfter = (playerCards, enemyCards) => {
 // Apply Armor to incoming damage
 const applyArmor = (card, incomingDamage) => {
     if (card.ability?.["Armor"]) {
-        const damageReduction = card.ability["Armor"] / 2;
-        return Math.max(incomingDamage - damageReduction, 0); // Armor can't make damage negative
+        const damageReduction = Math.floor(card.ability["Armor"] / 2);
+        return Math.max(incomingDamage - damageReduction, 0);
     }
-    return incomingDamage; // No armor, return original damage
+    return incomingDamage;
 };
 
 // Apply Thorns damage back to attacker
 const applyThorns = (card) => {
     if (card.ability?.["Thorns"]) {
-        const thornsDamage = card.ability["Thorns"];
-        return thornsDamage; // Return thorns damage
+        return Math.floor(card.ability["Thorns"]);
     }
-    return 0; // No thorns, return 0 damage
+    return 0;
 };
 
 // Apply Life Steal ability
 const applyLifeSteal = (offender, defender) => {
     if (offender.ability?.["Life Steal"]) {
         const healthGained = Math.min(
-            offender.ability["Life Steal"],
+            Math.floor(offender.ability["Life Steal"]),
             defender.health
         );
         applyHeal(offender, healthGained);
@@ -170,12 +164,12 @@ const applyLifeSteal = (offender, defender) => {
 const applyRivalry = (offender, defender) => {
     if (offender.ability?.["Rivalry (Attack)"]) {
         if (offender.attack > defender.attack) {
-            defender.health -= offender.ability["Rivalry (Attack)"];
+            defender.health -= Math.floor(offender.ability["Rivalry (Attack)"]);
         }
     }
     if (offender.ability?.["Rivalry (Health)"]) {
         if (offender.health > defender.health) {
-            defender.health -= offender.ability["Rivalry (Health)"];
+            defender.health -= Math.floor(offender.ability["Rivalry (Health)"]);
         }
     }
 };
@@ -184,10 +178,9 @@ const applyRivalry = (offender, defender) => {
 const applyRecoil = (offender, defender) => {
     if (offender.ability?.["Recoil"]) {
         const recoilDamage = Math.min(
-            offender.ability["Recoil"] / 2,
+            Math.floor(offender.ability["Recoil"] / 2),
             defender.health
         );
-        // Deal damage directly
         offender.health -= recoilDamage;
     }
 };
@@ -200,17 +193,17 @@ const applyDoubleAttack = (offender, defender) => {
 
 // Apply any heal
 const applyHeal = (card, health) => {
-    card.health = Math.min(card.health + health, card.maxHealth);
+    card.health = Math.min(card.health + Math.floor(health), card.maxHealth);
 };
 
 // Apply any damage from any source
 const applyDamage = (offender, defender, damage) => {
-    const newDamage = applyArmor(defender, damage);
+    const newDamage = applyArmor(defender, Math.floor(damage));
     if (newDamage === 0 || defender.ability?.["Shield"]) return;
     defender.health -= newDamage;
-    // Apply Thorns damage to the attacker after damage is dealt
+
     let thornsDamage = applyThorns(defender);
-    thornsDamage = applyArmor(offender, thornsDamage); // Armor the thorns damage
+    thornsDamage = applyArmor(offender, Math.floor(thornsDamage));
     offender.health -= thornsDamage;
 };
 
@@ -224,7 +217,7 @@ const checkCardHealth = (card) => {
 };
 
 const doAttack = (playerCard, enemyCard) => {
-    let incomingDamage = playerCard.attack;
+    let incomingDamage = Math.floor(playerCard.attack);
     applyLifeSteal(playerCard, enemyCard);
     applyRecoil(playerCard, enemyCard);
     applyRivalry(playerCard, enemyCard);
@@ -232,11 +225,9 @@ const doAttack = (playerCard, enemyCard) => {
 };
 
 const handleBattleTurn = (playerCards, enemyCards) => {
-    // Assumes playerCards and enemyCards are arrays of cards in each lane
     let updatedPlayerCards = [...playerCards];
     let updatedEnemyCards = [...enemyCards];
 
-    // Ability Phase
     updatedPlayerCards = handleCardAbilitiesBefore(
         updatedPlayerCards,
         updatedEnemyCards
@@ -246,23 +237,19 @@ const handleBattleTurn = (playerCards, enemyCards) => {
         updatedPlayerCards
     );
 
-    // Battle Phase
     for (let i = 0; i < 3; i++) {
         let playerCard = updatedPlayerCards[i];
         let enemyCard = updatedEnemyCards[i];
 
         if (playerCard && enemyCard) {
-            // Player attacks enemy card
             doAttack(playerCard, enemyCard);
             applyDoubleAttack(playerCard, enemyCard);
 
-            // Enemy attacks player card
             doAttack(enemyCard, playerCard);
             applyDoubleAttack(enemyCard, playerCard);
         }
     }
 
-    // AFTER TURN ABILITIES (like Power-Up, which should increase attack after battle)
     ({ updatedPlayerCards, updatedEnemyCards } = handleCardAbilitiesAfter(
         updatedPlayerCards,
         updatedEnemyCards
@@ -274,4 +261,4 @@ const handleBattleTurn = (playerCards, enemyCards) => {
     };
 };
 
-module.exports = { handleBattleTurn };
+export { handleBattleTurn };
